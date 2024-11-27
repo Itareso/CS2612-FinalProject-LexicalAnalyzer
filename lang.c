@@ -6,7 +6,7 @@
 void copy_char_set(struct char_set *dst, struct char_set *src)
 {
     dst->n = src->n;
-    strcpy(dst->c, src->n);
+    strcpy(dst->c, src->c);
 }
 
 struct frontend_regexp *TFr_CharSet(struct char_set *c)

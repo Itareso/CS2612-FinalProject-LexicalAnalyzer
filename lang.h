@@ -128,4 +128,8 @@ struct finite_automata *create_empty_graph();
 int add_one_vertex(struct finite_automata *g);                                     /* add a new vertex to the graph and return the id of the new vertex */
 int add_one_edge(struct finite_automata *g, int src, int dst, struct char_set *c); /* add a new edge to the graph and return the id of the new edge */
 
+struct finite_automata *nfa_to_dfa(struct finite_automata *nfa);
+void move(struct finite_automata *nfa, int *states, int num_states, struct char_set *input, int *result);
+void epsilon_closure(struct finite_automata *nfa, int *states, int num_states, int *closure) ;
+
 #endif // LANG_H_INCLUDED
