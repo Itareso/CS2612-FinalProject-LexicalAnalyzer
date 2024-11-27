@@ -8,7 +8,7 @@
 struct char_set
 {
     char *c;
-    unsigned int n;
+    unsigned int n; // if the edge is a epsilon edge, n = 0, otherwise n = 1
 };
 
 enum FrontendRegExpType
@@ -111,6 +111,27 @@ struct finite_automata
     int *accepting; /* An array to indicate which DFA states are accepting states */
 };
 
+struct dfa_node
+{
+    int *state;
+    int id;
+    int length;
+};
+
+struct D_finite_automata
+{
+    int n; /* number of vertices, id of vertices are: 0, 1, ..., (n - 1) */
+    int m; /* number of edges, id of edges are: 0, 1, ..., (m - 1) */
+    int array_size;
+    int *src;            /* for every edge e, src[e] is the source vertex of e */
+    int *dst;            /* for every edge e, dst[e] is the destination vertex of e */
+    struct char_set *lb; /* for every edge e, lb[e] are the transition lables on e, if the char set empty, the edge is an epsilon edge */
+    int *adj;            /* for every vertex v, adj[v] is the first adjacent edge of v */
+    int *next;           /* for every edge e, next[e] is the next neighbour edge of e, two edges are neighbours if they have the same src */
+    int *accepting; /* An array to indicate which DFA states are accepting states */
+    struct dfa_node *nodes;
+};
+
 void copy_char_set(struct char_set *dst, struct char_set *src);
 struct frontend_regexp *TFr_CharSet(struct char_set *c);
 struct frontend_regexp *TFr_Option(struct frontend_regexp *r);
@@ -125,13 +146,18 @@ struct simpl_regexp *TS_Star(struct simpl_regexp *r);
 struct simpl_regexp *TS_EmptyStr();
 struct simpl_regexp *TS_Union(struct simpl_regexp *r1, struct simpl_regexp *r2);
 struct simpl_regexp *TS_Concat(struct simpl_regexp *r1, struct simpl_regexp *r2);
+
 struct finite_automata *create_empty_graph();
 int add_one_vertex(struct finite_automata *g);                                     /* add a new vertex to the graph and return the id of the new vertex */
 int add_one_edge(struct finite_automata *g, int src, int dst, struct char_set *c); /* add a new edge to the graph and return the id of the new edge */
 
-struct finite_automata *nfa_to_dfa(struct finite_automata *nfa);
-void move(struct finite_automata *nfa, int *states, int num_states, struct char_set *input, int *result);
-void epsilon_closure(struct finite_automata *nfa, int *states, int num_states, int *closure) ;
+struct finite_automata *create_dfa_empty_graph();
+int add_one_vertex_to_dfa(struct finite_automata *g);
+int add_one_edge_to_dfa(struct finite_automata *g, int src, int dst, struct char_set *c);
+
+
+int *move(struct finite_automata *nfa, int *states, struct char_set *input);
+int *epsilon_closure(struct finite_automata *nfa, int *states) ;
 int get_dfa_next_state(struct finite_automata *dfa, int current_state, char input_char);
 int match_string_with_dfa(struct finite_automata *dfa, const char *input_string);
 

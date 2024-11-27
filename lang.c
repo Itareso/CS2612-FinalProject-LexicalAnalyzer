@@ -192,16 +192,88 @@ int add_one_edge(struct finite_automata *g, int src, int dst, struct char_set *c
     return new_edge_id;
 }
 
+struct D_finite_automata *create_dfa_empty_graph()
+{
+    struct D_finite_automata *fa;
+    fa = (struct D_finite_automata *)malloc(sizeof(struct D_finite_automata));
+    fa->n = 0;
+    fa->m = 0;
+    fa->array_size = 100;
+    fa->src = (int *)malloc(fa->array_size * sizeof(int));
+    fa->dst = (int *)malloc(fa->array_size * sizeof(int));
+    fa->adj = (int *)malloc(fa->array_size * sizeof(int));
+    fa->next = (int *)malloc(fa->array_size * sizeof(int));
+    fa->lb = (struct char_set *)malloc(fa->array_size * sizeof(struct char_set));
+    fa->nodes = (struct dfa_node *)malloc(fa->array_size * sizeof(struct dfa_node));
+
+    return fa;
+}
+
+int add_one_vertex_to_dfa(struct D_finite_automata *g)
+{
+    int new_vertex_id = g->n;
+    g->n++;
+    if (g->n >= g->array_size)
+    {
+        g->array_size *= 2;
+        g->src = realloc(g->src, g->array_size * sizeof(int));
+        g->dst = realloc(g->dst, g->array_size * sizeof(int));
+        g->adj = realloc(g->adj, g->array_size * sizeof(int));
+        g->next = realloc(g->next, g->array_size * sizeof(int));
+        g->lb = realloc(g->lb, g->array_size * sizeof(struct char_set));
+        g->nodes = realloc(g->nodes, g->array_size * sizeof(struct dfa_node));
+    }
+    g->adj[new_vertex_id] = -1;
+    return new_vertex_id;
+}
+
+int add_one_edge_to_dfa(struct D_finite_automata *g, int src, int dst, struct char_set *c)
+{
+    int new_edge_id = g->m;
+    g->m++;
+    if (g->m >= g->array_size)
+    {
+        g->array_size *= 2;
+        g->src = realloc(g->src, g->array_size * sizeof(int));
+        g->dst = realloc(g->dst, g->array_size * sizeof(int));
+        g->adj = realloc(g->adj, g->array_size * sizeof(int));
+        g->next = realloc(g->next, g->array_size * sizeof(int));
+        g->lb = realloc(g->lb, g->array_size * sizeof(struct char_set));
+        g->nodes = realloc(g->nodes, g->array_size * sizeof(struct dfa_node));
+    }
+    g->src[new_edge_id] = src;
+    g->dst[new_edge_id] = dst;
+    g->lb[new_edge_id] = *c;
+    g->next[new_edge_id] = -1;
+    if (g->adj[src] == -1)
+    {
+        g->adj[src] = new_edge_id;
+    }
+    else
+    {
+        int e = g->adj[src];
+        while (g->next[e] != -1)
+            e = g->next[e];
+        g->next[e] = new_edge_id;
+    }
+    return new_edge_id;
+}
+
 // From nfa to dfa
-void epsilon_closure(struct finite_automata *nfa, int *states, int num_states, int *closure) {
-    int *visited = (int *)malloc(nfa->n * sizeof(int));
-    memset(visited, 0, nfa->n * sizeof(int));
-    memset(visited, 0, sizeof(visited));
+
+/*
+    input a state
+    return the state after running all the possible episilon transitions
+*/
+int *epsilon_closure(struct finite_automata *nfa, int state_number, int *states) {
+    
+    int *closure = (int *)malloc(nfa->n * sizeof(int));
+    memset(closure, 0, nfa->n * sizeof(int));
 
     // 将初始状态加入ε-闭包
-    for (int i = 0; i < num_states; i++) {
-        closure[states[i]] = 1;
-        visited[states[i]] = 1;
+    for (int i = 0; i < state_number; i++) {
+        if (states[i] == 0) continue;  // 跳过无效状态
+        closure[i] = 1;
     }
 
     // 扩展ε-闭包，处理所有通过epsilon转换的状态
@@ -209,12 +281,10 @@ void epsilon_closure(struct finite_automata *nfa, int *states, int num_states, i
     do {
         changes = 0;
         for (int i = 0; i < nfa->m; i++) {
-            if (visited[nfa->src[i]]) {
-                // 如果src是已访问的状态，检查是否有epsilon转换
+            if (closure[nfa->src[i]]) { // source is in closure
                 if (nfa->lb[i].n == 0) { // epsilon transition
                     int dst = nfa->dst[i];
-                    if (!visited[dst]) {
-                        visited[dst] = 1;
+                    if (!closure[dst]) {
                         closure[dst] = 1;
                         changes = 1;
                     }
@@ -222,55 +292,139 @@ void epsilon_closure(struct finite_automata *nfa, int *states, int num_states, i
             }
         }
     } while (changes); // 如果有变化，继续扩展
+
+    return closure;
 }
 
-// 从当前NFA状态集合，计算下一个状态集合
-void move(struct finite_automata *nfa, int *states, int num_states, struct char_set *input, int *result)
+// return the states after running a single input char, also considering the epsilon transitions
+int *move(struct finite_automata *nfa, int *states, int state_number, char input)
 {
-    memset(result, 0, nfa->n * sizeof(int)); // 清空result
-
-    for (int i = 0; i < num_states; i++) {
-        for (int e = nfa->adj[states[i]]; e != -1; e = nfa->next[e]) {
-            if (nfa->lb[e].n == 0 || strcmp(nfa->lb[e].c, input->c) == 0) { // Epsilon or matching char
+    int *result = (int *)malloc(nfa->n * sizeof(int));
+    memset(result, 0, nfa->n * sizeof(int));
+    for (int i = 0; i < state_number; i++) {
+        if (states[i] == 0) continue;  // 跳过无效状态
+        for (int e = nfa->adj[i]; e != -1; e = nfa->next[e]) {
+            if (nfa->lb[e].n == 0 || strchr(nfa->lb[e].c, input) != NULL) { // Epsilon or matching char
                 result[nfa->dst[e]] = 1;
             }
         }
     }
+    result = epsilon_closure(nfa, state_number, result);
+    return result;
 }
 
-// 生成DFA
-struct finite_automata *nfa_to_dfa(struct finite_automata *nfa)
-{
-    struct finite_automata *dfa = create_empty_graph();
-    int *state_map = (int *)malloc(nfa->n * sizeof(int));  // NFA到DFA状态的映射
-    int num_dfa_states = 0;
+// compare two sets of states
+int compare_sets(int *setA, int *setB, int nfa_size) {
+    for (int i = 0; i < nfa_size; i++) {
+        if (setA[i] != setB[i]) {
+            return 0;  // 如果存在不同，返回0
+        }
+    }
+    return 1;  // 相同，返回1
+}
 
-    // 初始状态
-    int *init_states = (int *)malloc(nfa->n * sizeof(int));
-    init_states[0] = 1;  // 默认NFA从状态0开始
-    int *closure = (int *)malloc(nfa->n * sizeof(int));
-    epsilon_closure(nfa, init_states, 1, closure);
+// 从状态集合生成DFA状态ID
+int generate_state_id(struct D_finite_automata *dfa, int *state_set, int state_count) {
+    for (int i = 0; i < dfa->n; i++) {
+        if (compare_sets(dfa->nodes[i].state, state_set, dfa->nodes[i].length)) {
+            return dfa->nodes[i].id;
+        }
+    }
+
+    // 如果没有找到，创建新状态并返回ID
+    int new_id = add_one_vertex_to_dfa(dfa);
+    dfa->nodes[new_id].state = state_set;
+    dfa->nodes[new_id].length = state_count;
+    dfa->nodes[new_id].id = new_id;
+
+    return new_id;
+}
+
+// nfa_to_dfa：将NFA转换为DFA
+struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa) {
+    struct D_finite_automata *dfa = create_dfa_empty_graph();
+
+    // 使用一个数组来存储NFA状态集合，初始化为NFA的起始状态的epsilon闭包
+    int *start_closure = (int *)malloc(nfa->n * sizeof(int));
+    memset(start_closure, 0, nfa->n * sizeof(int));
+    start_closure[0] = 1;  // 假设NFA的起始状态是状态0，并加入到闭包
     
-    // 新DFA状态id
-    int start_state = add_one_vertex(dfa);
-    state_map[start_state] = 0; // map DFA state 0 to NFA's epsilon closure
+    // 计算起始状态的epsilon闭包
+    start_closure = epsilon_closure(nfa, start_closure, 1); //get the first state of dfa
 
-    // 为新状态添加转移
-    struct char_set alphabet;  // 按照字符集遍历转换
+    // 将起始状态的epsilon闭包加入DFA
+    int start_state_id = generate_state_id(dfa, start_closure, nfa->n);
+    // add_one_vertex_to_dfa(dfa); 
+    // TODO:
 
-    // 假设我们处理所有字符集
-    for (int i = 0; i < num_dfa_states; i++) {
-        int *next_states = (int *)malloc(nfa->n * sizeof(int));
-        move(nfa, closure, num_dfa_states, &alphabet, next_states);
+    // DFA状态队列，用于遍历DFA的每个状态
+    int *state_queue = (int *)malloc(dfa->n * sizeof(int));
+    int queue_head = 0, queue_tail = 0;
+
+    // 初始状态加入队列
+    state_queue[queue_tail++] = start_state_id;
+
+    // 对DFA中的每个状态，遍历所有字符的转换
+    while (queue_head < queue_tail) {
+        int current_state_id = state_queue[queue_head++];
         
-        int new_dfa_state = add_one_vertex(dfa);
-        state_map[new_dfa_state] = 1;  // 为新状态添加映射
-        // 进一步操作：创建新的边，保存dfa的结构
+        // 对当前DFA状态，检查每一个字符
+        for (char c = 'a'; c <= 'z'; c++) { 
+            // TODO: 可能需要修改字符范围, 也可以考虑改为只查找这个NFA状态的出边
+            int *new_state = move(nfa, dfa->nodes[current_state_id].state, dfa->nodes[current_state_id].length, c);
+            
+            if (new_state != NULL) {
+                int new_state_id = generate_state_id(dfa, new_state, nfa->n);
+
+                // 如果新状态不在队列中，则加入队列，并添加相应的边
+                int is_new_state = 1; 
+                //TODO: 判断是否是新状态存疑
+                for (int i = queue_head; i < queue_tail; i++) {
+                    if (dfa->nodes[state_queue[i]].id == new_state_id) {
+                        is_new_state = 0;
+                        break;
+                    }
+                }
+                
+                if (is_new_state) {
+                    state_queue[queue_tail++] = new_state_id;
+
+                    // 为DFA添加边
+                    struct char_set *cs = (struct char_set *)malloc(sizeof(struct char_set));
+                    cs->n = 1;
+                    cs->c = (char *)malloc(sizeof(char));
+                    cs->c[0] = c;  // 将字符c作为边标签
+                    add_one_edge_to_dfa(dfa, current_state_id, new_state_id, cs);
+                }
+                else {
+                    //TODO: add the char to the edge
+
+                }
+
+                free(new_state);
+            }
+        }
+    }
+
+    // 处理DFA的接受状态
+    for (int i = 0; i < dfa->n; i++) {
+        for (int j = 0; j < nfa->n; j++) {
+            if (nfa->accepting[j] && compare_sets(dfa->nodes[i].state, &j, 1)) {
+                dfa->accepting[i] = 1;  // 设置DFA接受状态
+            }
+        }
     }
 
     return dfa;
 }
 
+
+
+
+
+
+
+// run the dfa on the input string
 // 获取DFA某个状态对某个字符的转移目标状态
 int get_dfa_next_state(struct finite_automata *dfa, int current_state, char input_char) {
     for (int e = dfa->adj[current_state]; e != -1; e = dfa->next[e]) {
