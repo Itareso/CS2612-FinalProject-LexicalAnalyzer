@@ -1,4 +1,5 @@
 #include "regex.h"
+#include "lang.h"
 
 struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
 {
@@ -9,6 +10,7 @@ struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
     case T_FR_CHAR_SET:
         sr->t = T_S_CHAR_SET;
         sr->d.CHAR_SET = r->d.CHAR_SET;
+        break;
     case T_FR_OPTIONAL:
         sr->t = T_S_UNION;
         struct simpl_regexp *none;
@@ -16,17 +18,20 @@ struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
         none->t = T_S_EMPTY_STR;
         sr->d.UNION.r1 = none;
         sr->d.UNION.r2 = simplify_regexp(r->d.OPTION.r);
+        break;
     case T_FR_STAR:
         sr->t = T_S_STAR;
         sr->d.STAR.r = simplify_regexp(r->d.STAR.r);
+        break;
     case T_FR_PLUS:
         sr->t = T_S_CONCAT;
         sr->d.CONCAT.r1 = simplify_regexp(r->d.PLUS.r);
         struct simpl_regexp *star;
         star = (struct simpl_regexp *)malloc(sizeof(struct simpl_regexp));
         star->t = T_S_STAR;
-        star->d.STAR.r = simpl_regexp(r->d.PLUS.r);
+        star->d.STAR.r = simplify_regexp(r->d.PLUS.r);
         sr->d.CONCAT.r2 = star;
+        break;
     case T_FR_STRING:
         sr->t = T_S_CONCAT;
         struct simpl_regexp *schar;
@@ -57,23 +62,27 @@ struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
             sr->d.CONCAT.r2 = simplify_regexp(rstring);
             free(rstring);
         }
+        break;
     case T_FR_SINGLE_CHAR:
-        sr->t = T_S_CHAR_SET;
+        {sr->t = T_S_CHAR_SET;
         struct char_set cs;
         cs.n = 1;
         char *str = (char *)malloc(2 * sizeof(char));
         str[0] = r->d.SINGLE_CHAR.c;
         str[1] = '\0';
         cs.c = str;
-        sr->d.CHAR_SET = cs;
+        sr->d.CHAR_SET = cs;}
+        break;
     case T_FR_UNION:
         sr->t = T_S_UNION;
         sr->d.UNION.r1 = simplify_regexp(r->d.UNION.r1);
         sr->d.UNION.r2 = simplify_regexp(r->d.UNION.r2);
+        break;
     case T_FR_CONCAT:
         sr->t = T_S_CONCAT;
         sr->d.CONCAT.r1 = simplify_regexp(r->d.CONCAT.r1);
         sr->d.CONCAT.r2 = simplify_regexp(r->d.CONCAT.r2);
+        break;
     }
     return sr;
 }
@@ -95,22 +104,25 @@ int add_one_regexp(struct finite_automata *g, struct simpl_regexp *r, int start)
     switch (r->t)
     {
     case T_S_CHAR_SET:
-        struct char_set target_charset = r->d.CHAR_SET;
+        {struct char_set target_charset = r->d.CHAR_SET;
         int target_v = add_one_vertex(g);
         int edge = add_one_edge(g, start, target_v, &target_charset);
-        end_v = target_v;
+        end_v = target_v;} 
+        break;
     case T_S_STAR:
-        int mid_v = add_one_vertex(g);
+        {int mid_v = add_one_vertex(g);
         int target_v = add_one_regexp(g, r->d.STAR.r, mid_v);
         int edge1 = add_one_edge(g, start, target_v, &emptycs);
         int edge2 = add_one_edge(g, target_v, mid_v, &emptycs);
-        end_v = target_v;
+        end_v = target_v;}
+        break;
     case T_S_EMPTY_STR:
-        int target_v = add_one_vertex(g);
+        {int target_v = add_one_vertex(g);
         int edge = add_one_edge(g, start, target_v, &emptycs);
-        end_v = target_v;
+        end_v = target_v;}
+        break;
     case T_S_UNION:
-        int mid_v1 = add_one_vertex(g);
+        {int mid_v1 = add_one_vertex(g);
         int mid_v2 = add_one_vertex(g);
         int mid_edge1 = add_one_edge(g, start, mid_v1, &emptycs);
         int mid_edge2 = add_one_edge(g, start, mid_v2, &emptycs);
@@ -119,13 +131,15 @@ int add_one_regexp(struct finite_automata *g, struct simpl_regexp *r, int start)
         int target_v = add_one_vertex(g);
         int mid_edge3 = add_one_edge(g, target_v1, target_v, &emptycs);
         int mid_edge4 = add_one_edge(g, target_v2, target_v, &emptycs);
-        end_v = target_v;
+        end_v = target_v;}
+        break;
     case T_S_CONCAT:
-        int mid_v1 = add_one_regexp(g, r->d.CONCAT.r1, start);
+        {int mid_v1 = add_one_regexp(g, r->d.CONCAT.r1, start);
         int mid_v2 = add_one_vertex(g);
         int mid_edge = add_one_edge(g, mid_v1, mid_v2, &emptycs);
         int target_v = add_one_regexp(g, r->d.CONCAT.r2, mid_v2);
-        end_v = target_v;
+        end_v = target_v;}
+        break;
     }
     return end_v;
 }

@@ -108,6 +108,7 @@ struct finite_automata
     struct char_set *lb; /* for every edge e, lb[e] are the transition lables on e, if the char set empty, the edge is an epsilon edge */
     int *adj;            /* for every vertex v, adj[v] is the first adjacent edge of v */
     int *next;           /* for every edge e, next[e] is the next neighbour edge of e, two edges are neighbours if they have the same src */
+    int *accepting; /* An array to indicate which DFA states are accepting states */
 };
 
 void copy_char_set(struct char_set *dst, struct char_set *src);
@@ -131,5 +132,8 @@ int add_one_edge(struct finite_automata *g, int src, int dst, struct char_set *c
 struct finite_automata *nfa_to_dfa(struct finite_automata *nfa);
 void move(struct finite_automata *nfa, int *states, int num_states, struct char_set *input, int *result);
 void epsilon_closure(struct finite_automata *nfa, int *states, int num_states, int *closure) ;
+int get_dfa_next_state(struct finite_automata *dfa, int current_state, char input_char);
+int match_string_with_dfa(struct finite_automata *dfa, const char *input_string);
+
 
 #endif // LANG_H_INCLUDED

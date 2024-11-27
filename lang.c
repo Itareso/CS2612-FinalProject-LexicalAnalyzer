@@ -271,3 +271,38 @@ struct finite_automata *nfa_to_dfa(struct finite_automata *nfa)
     return dfa;
 }
 
+// 获取DFA某个状态对某个字符的转移目标状态
+int get_dfa_next_state(struct finite_automata *dfa, int current_state, char input_char) {
+    for (int e = dfa->adj[current_state]; e != -1; e = dfa->next[e]) {
+        if (dfa->lb[e].n == 1 && dfa->lb[e].c[0] == input_char) {
+            return dfa->dst[e];  // 找到匹配的转移边并返回目标状态
+        }
+    }
+    return -1;  // 没有匹配的转移，返回-1表示没有转移
+}
+
+// 执行DFA的字符串匹配
+int match_string_with_dfa(struct finite_automata *dfa, const char *input_string) {
+    int current_state = 0; // 从DFA的起始状态开始
+
+    // 遍历输入字符串
+    for (int i = 0; i < strlen(input_string); i++) {
+        char input_char = input_string[i];
+        
+        // 获取DFA当前状态对于输入字符的下一个状态
+        current_state = get_dfa_next_state(dfa, current_state, input_char);
+
+        // 如果没有匹配的转移，直接返回失败
+        if (current_state == -1) {
+            return 0; // 匹配失败
+        }
+    }
+
+    // 如果当前状态是一个接受状态，则匹配成功
+    if (dfa->accepting[current_state] == 1) {
+        return 1; // 匹配成功
+    }
+
+    return 0; // 匹配失败
+}
+
