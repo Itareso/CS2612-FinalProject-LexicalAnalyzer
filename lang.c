@@ -1,4 +1,7 @@
 #include "lang.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 void copy_char_set(struct char_set *dst, struct char_set *src)
 {
@@ -188,3 +191,83 @@ int add_one_edge(struct finite_automata *g, int src, int dst, struct char_set *c
     }
     return new_edge_id;
 }
+
+// From nfa to dfa
+void epsilon_closure(struct finite_automata *nfa, int *states, int num_states, int *closure) {
+    int *visited = (int *)malloc(nfa->n * sizeof(int));
+    memset(visited, 0, nfa->n * sizeof(int));
+    memset(visited, 0, sizeof(visited));
+
+    // 将初始状态加入ε-闭包
+    for (int i = 0; i < num_states; i++) {
+        closure[states[i]] = 1;
+        visited[states[i]] = 1;
+    }
+
+    // 扩展ε-闭包，处理所有通过epsilon转换的状态
+    int changes;
+    do {
+        changes = 0;
+        for (int i = 0; i < nfa->m; i++) {
+            if (visited[nfa->src[i]]) {
+                // 如果src是已访问的状态，检查是否有epsilon转换
+                if (nfa->lb[i].n == 0) { // epsilon transition
+                    int dst = nfa->dst[i];
+                    if (!visited[dst]) {
+                        visited[dst] = 1;
+                        closure[dst] = 1;
+                        changes = 1;
+                    }
+                }
+            }
+        }
+    } while (changes); // 如果有变化，继续扩展
+}
+
+// 从当前NFA状态集合，计算下一个状态集合
+void move(struct finite_automata *nfa, int *states, int num_states, struct char_set *input, int *result)
+{
+    memset(result, 0, nfa->n * sizeof(int)); // 清空result
+
+    for (int i = 0; i < num_states; i++) {
+        for (int e = nfa->adj[states[i]]; e != -1; e = nfa->next[e]) {
+            if (nfa->lb[e].n == 0 || strcmp(nfa->lb[e].c, input->c) == 0) { // Epsilon or matching char
+                result[nfa->dst[e]] = 1;
+            }
+        }
+    }
+}
+
+// 生成DFA
+struct finite_automata *nfa_to_dfa(struct finite_automata *nfa)
+{
+    struct finite_automata *dfa = create_empty_graph();
+    int *state_map = (int *)malloc(nfa->n * sizeof(int));  // NFA到DFA状态的映射
+    int num_dfa_states = 0;
+
+    // 初始状态
+    int *init_states = (int *)malloc(nfa->n * sizeof(int));
+    init_states[0] = 1;  // 默认NFA从状态0开始
+    int *closure = (int *)malloc(nfa->n * sizeof(int));
+    epsilon_closure(nfa, init_states, 1, closure);
+    
+    // 新DFA状态id
+    int start_state = add_one_vertex(dfa);
+    state_map[start_state] = 0; // map DFA state 0 to NFA's epsilon closure
+
+    // 为新状态添加转移
+    struct char_set alphabet;  // 按照字符集遍历转换
+
+    // 假设我们处理所有字符集
+    for (int i = 0; i < num_dfa_states; i++) {
+        int *next_states = (int *)malloc(nfa->n * sizeof(int));
+        move(nfa, closure, num_dfa_states, &alphabet, next_states);
+        
+        int new_dfa_state = add_one_vertex(dfa);
+        state_map[new_dfa_state] = 1;  // 为新状态添加映射
+        // 进一步操作：创建新的边，保存dfa的结构
+    }
+
+    return dfa;
+}
+
