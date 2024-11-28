@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 struct char_set
 {
@@ -160,6 +161,8 @@ int *move(struct finite_automata *nfa, int *states, struct char_set *input);
 int *epsilon_closure(struct finite_automata *nfa, int *states) ;
 int get_dfa_next_state(struct finite_automata *dfa, int current_state, char input_char);
 int match_string_with_dfa(struct finite_automata *dfa, const char *input_string);
+
+bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str);
 
 
 #endif // LANG_H_INCLUDED
