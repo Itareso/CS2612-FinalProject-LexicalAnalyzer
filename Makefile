@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -Wno-unused-variable
 OBJ = main.o regex.o lang.o
 EXEC = my_program.exe
 

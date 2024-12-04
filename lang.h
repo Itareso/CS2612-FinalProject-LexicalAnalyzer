@@ -6,14 +6,12 @@
 #include <string.h>
 #include <stdbool.h>
 
-struct char_set
-{
+struct char_set {
     char *c;
     unsigned int n; // if the edge is a epsilon edge, n = 0, otherwise n = 1
 };
 
-enum FrontendRegExpType
-{
+enum FrontendRegExpType {
     T_FR_CHAR_SET = 0,
     T_FR_OPTIONAL,
     T_FR_STAR,
@@ -24,39 +22,30 @@ enum FrontendRegExpType
     T_FR_CONCAT
 };
 
-struct frontend_regexp
-{
+struct frontend_regexp {
     enum FrontendRegExpType t;
-    union
-    {
+    union {
         struct char_set CHAR_SET;
-        struct
-        {
+        struct {
             struct frontend_regexp *r;
         } OPTION;
-        struct
-        {
+        struct {
             struct frontend_regexp *r;
         } STAR;
-        struct
-        {
+        struct {
             struct frontend_regexp *r;
         } PLUS;
-        struct
-        {
+        struct {
             char *s;
         } STRING;
-        struct
-        {
+        struct {
             char c;
         } SINGLE_CHAR;
-        struct
-        {
+        struct {
             struct frontend_regexp *r1;
             struct frontend_regexp *r2;
         } UNION;
-        struct
-        {
+        struct {
             struct frontend_regexp *r1;
             struct frontend_regexp *r2;
         } CONCAT;
@@ -133,7 +122,7 @@ struct D_finite_automata
     struct dfa_node *nodes;
 };
 
-void copy_char_set(struct char_set *dst, struct char_set *src);
+void copy_char_set(struct char_set *dst, struct char_set *src, size_t n);
 struct frontend_regexp *TFr_CharSet(struct char_set *c);
 struct frontend_regexp *TFr_Option(struct frontend_regexp *r);
 struct frontend_regexp *TFr_Star(struct frontend_regexp *r);
@@ -152,15 +141,15 @@ struct finite_automata *create_empty_graph();
 int add_one_vertex(struct finite_automata *g);                                     /* add a new vertex to the graph and return the id of the new vertex */
 int add_one_edge(struct finite_automata *g, int src, int dst, struct char_set *c); /* add a new edge to the graph and return the id of the new edge */
 
-struct finite_automata *create_dfa_empty_graph();
-int add_one_vertex_to_dfa(struct finite_automata *g);
-int add_one_edge_to_dfa(struct finite_automata *g, int src, int dst, struct char_set *c);
+// struct finite_automata *create_dfa_empty_graph();
+// int add_one_vertex_to_dfa(struct finite_automata *g);
+// int add_one_edge_to_dfa(struct finite_automata *g, int src, int dst, struct char_set *c);
 
 
-int *move(struct finite_automata *nfa, int *states, struct char_set *input);
-int *epsilon_closure(struct finite_automata *nfa, int *states) ;
-int get_dfa_next_state(struct finite_automata *dfa, int current_state, char input_char);
-int match_string_with_dfa(struct finite_automata *dfa, const char *input_string);
+// int *move(struct finite_automata *nfa, int *states, struct char_set *input);
+// int *epsilon_closure(struct finite_automata *nfa, int *states) ;
+// int get_dfa_next_state(struct finite_automata *dfa, int current_state, char input_char);
+// int match_string_with_dfa(struct finite_automata *dfa, const char *input_string);
 
 bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str);
 

@@ -3,11 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 
-void copy_char_set(struct char_set *dst, struct char_set *src)
+#define END_OF(c) ((c) == '(' ? ')' : (c) == '[' ? ']' : (c) == '{' ? '}' : '\0')
+#define BEGIN_OF(c) ((c) == ')' ? '(' : (c) == ']' ? '[' : (c) == '}' ? '{' : '\0')
+
+void copy_char_set(struct char_set *dst, struct char_set *src, size_t n)
 {
     dst->n = src->n;
-    strcpy(dst->c, src->c);
+    strncpy(dst->c, src->c, n);
+    dst->c[n] = '\0';
 }
 
 struct frontend_regexp *TFr_CharSet(struct char_set *c)
@@ -454,7 +459,7 @@ bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str) {
             char *label = dfa->lb[edge].c;
             
             // 如果当前字符在标签集中，则进行转移
-            if (label != NULL && label[current_char]) {
+            if (label != NULL && label[current_state]) {
                 current_state = dfa->dst[edge];  // 转移到目标状态
                 transition_found = true;
                 break;
@@ -469,6 +474,186 @@ bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str) {
     }
 
     // 最后检查当前状态是否是接受状态
-    dfa->accepting[current_state] == 1;
-    return true;
+    if (dfa->accepting[current_state] == 1) {
+        return true;
+    }
+    return false;
+}
+
+
+// struct frontend_regexp *parse_regex(char *str, int len);
+
+struct frontend_regexp *parse_regex(char *str, int len) {
+    str[len] = '\0';
+    // printf("parse_regex: %d: %s\n", len, str);
+    int r=0;
+    struct frontend_regexp *fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
+    
+    if (len == 1) {
+        fr->t = T_FR_SINGLE_CHAR;
+        fr->d.SINGLE_CHAR.c = str[0];
+        return fr;
+    }
+
+    int small_bracket = 0;
+    for (; r<len; ++r) {
+        if (str[r] == '(') {
+            small_bracket++;
+        } else if (str[r] == ')') {
+            small_bracket--;
+        } else if (str[r] == '|' && small_bracket == 0) {
+            fr->t = T_FR_UNION;
+            fr->d.UNION.r1 = parse_regex(str, r);
+            fr->d.UNION.r2 = parse_regex(str+r+1, len-r-1);
+            return fr;
+        }
+    }
+    // 最外围没有 | 的情况
+    // 1. 第一个括号是()包围, 以及紧随着的 * + ? 三种情况
+    if (str[0] == '(') {
+        int p=0;
+        while (str[p] != ')') ++p;  // 找到另一半括号
+        if (p == len-1) {   // 整体就是一个括号 直接去除首尾
+            return parse_regex(str+1, len-2);
+        } else if (p == len-2) {    // 整体是一个括号 加 情况符
+            if (str[len-1] == '*') {
+                fr->t = T_FR_STAR;
+                fr->d.STAR.r = parse_regex(str+1, len-3);
+            } else if (str[len-1] == '+') {
+                fr->t = T_FR_PLUS;
+                fr->d.PLUS.r = parse_regex(str+1, len-3);
+            } else if (str[len-1] == '?') {
+                fr->t = T_FR_OPTIONAL;
+                fr->d.OPTION.r = parse_regex(str+1, len-3);
+            } else {    // 最后一位是单独字符
+                struct frontend_regexp *other_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
+                other_fr->t = T_FR_SINGLE_CHAR;
+                other_fr->d.SINGLE_CHAR.c = str[len-1];
+                fr->t = T_FR_CONCAT;
+                fr->d.CONCAT.r1 = parse_regex(str+1, len-2);
+                fr->d.CONCAT.r2 = other_fr;
+            }
+            return fr;
+        } else {    // 不是最后的括号包围
+            fr->t = T_FR_CONCAT;
+            if (str[p+1]=='*' || str[p+1]=='+' || str[p+1]=='?') {
+                fr->d.CONCAT.r1 = parse_regex(str, p+2);
+                fr->d.CONCAT.r2 = parse_regex(str+p+2, len-p-2);
+            } else {    // 只有一对括号没有情况符 则去除括号
+                fr->d.CONCAT.r1 = parse_regex(str+1, p-1);
+                fr->d.CONCAT.r2 = parse_regex(str+p+1, len-p-1);
+            }
+            return fr;
+        }
+    }
+    // 2. 第一个括号是[]包围, 以及紧随着的 * + ? 三种情况
+    if (str[0] == '[') {
+        int p=0;
+        while (str[p] != ']') ++p;  // 找到另一半括号
+        char *c = (char *)malloc(p-1);
+        strncpy(c, str+1, p-1);
+        c[p-1] = '\0';
+        struct char_set *cs = (struct char_set *)malloc(sizeof(struct char_set));
+        cs->n = p-1;
+        cs->c = c;
+        if (p == len-1) {   // 整体就是一个括号 直接去除首尾
+            fr->t = T_FR_CHAR_SET;
+            fr->d.CHAR_SET = *cs;
+            return fr;
+        } else if (p == len-2) {    // 整体是一个括号 加 情况符
+            if (str[len-1] == '*') {
+                fr->t = T_FR_STAR;
+                fr->d.STAR.r = TFr_CharSet(cs);
+            } else if (str[len-1] == '+') {
+                fr->t = T_FR_PLUS;
+                fr->d.PLUS.r = TFr_CharSet(cs);
+            } else if (str[len-1] == '?') {
+                fr->t = T_FR_OPTIONAL;
+                fr->d.OPTION.r = TFr_CharSet(cs);
+            } else { // 最后一位是单独字符
+                struct frontend_regexp *other_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
+                other_fr->t = T_FR_SINGLE_CHAR;
+                other_fr->d.SINGLE_CHAR.c = str[len-1];
+                fr->t = T_FR_CONCAT;
+                fr->d.CONCAT.r1 = TFr_CharSet(cs);
+                fr->d.CONCAT.r2 = other_fr;
+            }
+            return fr;
+        } else {    // 不是最后的括号包围
+            fr->t = T_S_CONCAT;
+            struct frontend_regexp *other_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
+            if (str[p+1]!='*') {
+                other_fr->t = T_FR_STAR;
+                other_fr->d.STAR.r = TFr_CharSet(cs);
+                fr->d.CONCAT.r1 = other_fr;
+                fr->d.CONCAT.r2 = parse_regex(str+p+2, len-p-2);
+            } else if (str[p+1]!='+') {
+                other_fr->t = T_FR_PLUS;
+                other_fr->d.PLUS.r = TFr_CharSet(cs);
+                fr->d.CONCAT.r1 = other_fr;
+                fr->d.CONCAT.r2 = parse_regex(str+p+2, len-p-2);
+            } else if (str[p+1]!='?') {
+                other_fr->t = T_FR_OPTIONAL;
+                other_fr->d.OPTION.r = TFr_CharSet(cs);
+                fr->d.CONCAT.r1 = other_fr;
+                fr->d.CONCAT.r2 = parse_regex(str+p+2, len-p-2);
+            } else {
+                fr->d.CONCAT.r1 = TFr_CharSet(cs);
+                fr->d.CONCAT.r2 = parse_regex(str+p+1, len-p-1);
+            }
+            return fr;
+        }
+    }
+    // 3. 第一个是字符, 则直到括号出现之前都视为string
+    if (str[0]!='(' && str[0]!='[') {
+        int p=0;
+        while (p<len && str[p]!='(' && str[p]!='['
+                && str[p]!='+' && str[p]!='*' && str[p]!='?') ++p;
+        if (p == len) {   // 整体是一个字符串
+            fr->t = T_FR_STRING;
+            fr->d.STRING.s = str;
+        } else if (str[p] == '[' || str[p] == '(') {
+            char *s = (char *)malloc(p+1);
+            strncpy(s, str, p); s[p] = '\0';
+            struct frontend_regexp *other_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
+            other_fr->t = T_FR_STRING;
+            other_fr->d.STRING.s = s;
+            fr->t = T_FR_CONCAT;
+            fr->d.CONCAT.r1 = other_fr;
+            fr->d.CONCAT.r2 = parse_regex(str+p, len-p);
+        } else {    // + * ? 针对单字符的情况
+            struct frontend_regexp *string_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));  // 记录之前的string
+            char *s = (char *)malloc(p);
+            strncpy(s, str, p-1); s[p-1] = '\0';
+            string_fr->t = T_FR_STRING;
+            string_fr->d.STRING.s = s;
+            struct frontend_regexp *single_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));  // 记录最后单个有特殊情况的字符
+            single_fr->t = T_FR_SINGLE_CHAR;
+            single_fr->d.SINGLE_CHAR.c = str[p-1];
+            struct frontend_regexp *concat_fr_1 = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));    // 用于连接前面两部分
+            concat_fr_1->t = T_FR_CONCAT;
+            concat_fr_1->d.CONCAT.r1 = string_fr;
+            if (str[p] == '*') {
+                struct frontend_regexp *star_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
+                star_fr->t = T_FR_STAR;
+                star_fr->d.STAR.r = single_fr;
+                concat_fr_1->d.CONCAT.r2 = star_fr;
+            } else if (str[p] == '+') {
+                struct frontend_regexp *plus_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
+                plus_fr->t = T_FR_PLUS;
+                plus_fr->d.PLUS.r = single_fr;
+                concat_fr_1->d.CONCAT.r2 = plus_fr;
+            } else if (str[p] == '?') {
+                struct frontend_regexp *option_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
+                option_fr->t = T_FR_OPTIONAL;
+                option_fr->d.OPTION.r = single_fr;
+                concat_fr_1->d.CONCAT.r2 = option_fr;
+            }
+            fr->t = T_FR_CONCAT;
+            fr->d.CONCAT.r1 = concat_fr_1;
+            fr->d.CONCAT.r2 = parse_regex(str+p+1, len-p-1);
+        }
+        return fr;
+    }
+    return fr;
 }

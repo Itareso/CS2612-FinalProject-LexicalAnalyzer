@@ -1,5 +1,6 @@
 #include "regex.h"
 #include "lang.h"
+#include <ctype.h>
 
 struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
 {

@@ -3,7 +3,162 @@
 #include <string.h>
 #include "regex.h"
 #include "lang.h"
+#include <ctype.h>
+
+
+// 打印辅助函数：打印字符串中的特殊字符（比如控制符）
+void print_string(const char *str) {
+    while (*str) {
+        if (*str == '\n') {
+            printf("\\n");
+        } else if (*str == '\t') {
+            printf("\\t");
+        } else {
+            putchar(*str);
+        }
+        str++;
+    }
+}
+
+// 打印字符集
+void print_char_set(struct char_set *cs) {
+    if (cs->n == 0) {
+        printf("Epsilon");
+    } else {
+        print_string(cs->c);
+    }
+}
+
+// 打印正则表达式树
+void printTree(struct frontend_regexp *node, int level) {
+    // 打印缩进
+    for (int i = 0; i < level; i++) {
+        printf("  ");
+    }
+
+    if (!node) {
+        printf("NULL\n");
+        return;
+    }
+
+    switch (node->t) {
+        case T_FR_CHAR_SET:
+            printf("CHAR_SET: ");
+            print_char_set(&node->d.CHAR_SET);
+            printf("\n");
+            break;
+
+        case T_FR_OPTIONAL:
+            printf("OPTIONAL:\n");
+            printTree(node->d.OPTION.r, level + 1);
+            break;
+
+        case T_FR_STAR:
+            printf("STAR:\n");
+            printTree(node->d.STAR.r, level + 1);
+            break;
+
+        case T_FR_PLUS:
+            printf("PLUS:\n");
+            printTree(node->d.PLUS.r, level + 1);
+            break;
+
+        case T_FR_STRING:
+            printf("STRING: \"%s\"\n", node->d.STRING.s);
+            break;
+
+        case T_FR_SINGLE_CHAR:
+            printf("SINGLE_CHAR: '%c'\n", node->d.SINGLE_CHAR.c);
+            break;
+
+        case T_FR_UNION:
+            printf("UNION:\n");
+            printTree(node->d.UNION.r1, level + 1);
+            printTree(node->d.UNION.r2, level + 1);
+            break;
+
+        case T_FR_CONCAT:
+            printf("CONCAT:\n");
+            printTree(node->d.CONCAT.r1, level + 1);
+            printTree(node->d.CONCAT.r2, level + 1);
+            break;
+
+        default:
+            printf("Unknown type\n");
+            break;
+    }
+}
+
+// 打印简化正则表达式树
+void printSimplifiedTree(struct simpl_regexp *node, int level) {
+    // 打印缩进
+    for (int i = 0; i < level; i++) {
+        printf("  ");
+    }
+
+    if (!node) {
+        printf("NULL\n");
+        return;
+    }
+
+    switch (node->t) {
+        case T_S_CHAR_SET:
+            printf("CHAR_SET: ");
+            print_char_set(&node->d.CHAR_SET);
+            printf("\n");
+            break;
+
+        case T_S_STAR:
+            printf("STAR:\n");
+            printSimplifiedTree(node->d.STAR.r, level + 1);
+            break;
+
+        case T_S_EMPTY_STR:
+            printf("EMPTY_STR\n");
+            break;
+
+        case T_S_UNION:
+            printf("UNION:\n");
+            printSimplifiedTree(node->d.UNION.r1, level + 1);
+            printSimplifiedTree(node->d.UNION.r2, level + 1);
+            break;
+
+        case T_S_CONCAT:
+            printf("CONCAT:\n");
+            printSimplifiedTree(node->d.CONCAT.r1, level + 1);
+            printSimplifiedTree(node->d.CONCAT.r2, level + 1);
+            break;
+
+        default:
+            printf("Unknown type\n");
+            break;
+    }
+}
 
 int main() {
+    char *regex;
+    int len;
+
+    while (true) {
+        printf(">>> ");
+        scanf("%d", &len);
+        if (len <= 0) {     // 输入 0 退出
+            break;
+        }
+        getchar();
+        printf(">>> ");
+        regex = (char *)malloc(len + 1);
+        for (int i=0; i<len; i++) {
+            regex[i] = getchar();
+        }
+        // printf("Input regex: \"%s\"\n", regex);
+        
+        struct frontend_regexp *tree = parse_regex(regex, len);
+        printf("[Regex Tree]\n");
+        printTree(tree, 0);
+        // struct simpl_regexp *simplified = simplify_regexp(tree);
+        // printf("[Simplified Regex Tree]\n");
+        // printSimplifiedTree(simplified, 0);
+    }
     return 0;
 }
