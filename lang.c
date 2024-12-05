@@ -483,16 +483,16 @@ bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str) {
 
 // struct frontend_regexp *parse_regex(char *str, int len);
 
-struct frontend_regexp *parse_regex(char *str, int len) {
+struct frontend_regexp *parse_regex(char *ori_str, int len) {
+    char *str = (char *)malloc(len+1);
+    strncpy(str, ori_str, len);
     str[len] = '\0';
     // printf("parse_regex: %d: %s\n", len, str);
     int r=0;
     struct frontend_regexp *fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
     
     if (len == 1) {
-        fr->t = T_FR_SINGLE_CHAR;
-        fr->d.SINGLE_CHAR.c = str[0];
-        return fr;
+        return TFr_SingleChar(str[0]);
     }
 
     int small_bracket = 0;
@@ -530,7 +530,7 @@ struct frontend_regexp *parse_regex(char *str, int len) {
                 other_fr->t = T_FR_SINGLE_CHAR;
                 other_fr->d.SINGLE_CHAR.c = str[len-1];
                 fr->t = T_FR_CONCAT;
-                fr->d.CONCAT.r1 = parse_regex(str+1, len-2);
+                fr->d.CONCAT.r1 = parse_regex(str+1, len-3);
                 fr->d.CONCAT.r2 = other_fr;
             }
             return fr;
@@ -556,11 +556,12 @@ struct frontend_regexp *parse_regex(char *str, int len) {
         struct char_set *cs = (struct char_set *)malloc(sizeof(struct char_set));
         cs->n = p-1;
         cs->c = c;
+        // printf("Input regex: \"%s\"\n", c);
         if (p == len-1) {   // 整体就是一个括号 直接去除首尾
             fr->t = T_FR_CHAR_SET;
             fr->d.CHAR_SET = *cs;
             return fr;
-        } else if (p == len-2) {    // 整体是一个括号 加 情况符
+        } else if (p == len-2) {    // 整体是一个括号 加 特殊符/单字符
             if (str[len-1] == '*') {
                 fr->t = T_FR_STAR;
                 fr->d.STAR.r = TFr_CharSet(cs);
@@ -580,19 +581,20 @@ struct frontend_regexp *parse_regex(char *str, int len) {
             }
             return fr;
         } else {    // 不是最后的括号包围
-            fr->t = T_S_CONCAT;
+            fr->t = T_FR_CONCAT;
+            // printf("charset in []: %s\n", c);
             struct frontend_regexp *other_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
-            if (str[p+1]!='*') {
+            if (str[p+1]=='*') {
                 other_fr->t = T_FR_STAR;
                 other_fr->d.STAR.r = TFr_CharSet(cs);
                 fr->d.CONCAT.r1 = other_fr;
                 fr->d.CONCAT.r2 = parse_regex(str+p+2, len-p-2);
-            } else if (str[p+1]!='+') {
+            } else if (str[p+1]=='+') {
                 other_fr->t = T_FR_PLUS;
                 other_fr->d.PLUS.r = TFr_CharSet(cs);
                 fr->d.CONCAT.r1 = other_fr;
                 fr->d.CONCAT.r2 = parse_regex(str+p+2, len-p-2);
-            } else if (str[p+1]!='?') {
+            } else if (str[p+1]=='?') {
                 other_fr->t = T_FR_OPTIONAL;
                 other_fr->d.OPTION.r = TFr_CharSet(cs);
                 fr->d.CONCAT.r1 = other_fr;
