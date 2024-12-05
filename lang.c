@@ -5,8 +5,12 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#define END_OF(c) ((c) == '(' ? ')' : (c) == '[' ? ']' : (c) == '{' ? '}' : '\0')
-#define BEGIN_OF(c) ((c) == ')' ? '(' : (c) == ']' ? '[' : (c) == '}' ? '{' : '\0')
+#define END_OF(c) ((c) == '(' ? ')' : (c) == '[' ? ']' \
+                                  : (c) == '{'   ? '}' \
+                                                 : '\0')
+#define BEGIN_OF(c) ((c) == ')' ? '(' : (c) == ']' ? '[' \
+                                    : (c) == '}'   ? '{' \
+                                                   : '\0')
 
 void copy_char_set(struct char_set *dst, struct char_set *src, size_t n)
 {
@@ -147,6 +151,7 @@ struct finite_automata *create_empty_graph()
     fa->adj = (int *)malloc(fa->array_size * sizeof(int));
     fa->next = (int *)malloc(fa->array_size * sizeof(int));
     fa->lb = (struct char_set *)malloc(fa->array_size * sizeof(struct char_set));
+    fa->accepting = (int *)malloc(fa->array_size * sizeof(int));
     return fa;
 }
 
@@ -162,8 +167,10 @@ int add_one_vertex(struct finite_automata *g)
         g->adj = realloc(g->adj, g->array_size * sizeof(int));
         g->next = realloc(g->next, g->array_size * sizeof(int));
         g->lb = realloc(g->lb, g->array_size * sizeof(struct char_set));
+        g->accepting = realloc(g->next, g->array_size * sizeof(int));
     }
     g->adj[new_vertex_id] = -1;
+    g->accepting[new_vertex_id] = 0;
     return new_vertex_id;
 }
 
@@ -179,6 +186,7 @@ int add_one_edge(struct finite_automata *g, int src, int dst, struct char_set *c
         g->adj = realloc(g->adj, g->array_size * sizeof(int));
         g->next = realloc(g->next, g->array_size * sizeof(int));
         g->lb = realloc(g->lb, g->array_size * sizeof(struct char_set));
+        g->accepting = realloc(g->next, g->array_size * sizeof(int));
     }
     g->src[new_edge_id] = src;
     g->dst[new_edge_id] = dst;
@@ -271,68 +279,86 @@ int add_one_edge_to_dfa(struct D_finite_automata *g, int src, int dst, struct ch
     input a state
     return the state after running all the possible episilon transitions
 */
-int *epsilon_closure(struct finite_automata *nfa, int *states, int state_count) {
+int *epsilon_closure(struct finite_automata *nfa, int *states, int state_count)
+{
     int *closure = (int *)malloc(nfa->n * sizeof(int));
     memset(closure, 0, nfa->n * sizeof(int));
-    
+
     // 将初始状态加入闭包
-    for (int i = 0; i < state_count; i++) {
-        if (states[i] == 0) continue;  // 跳过无效状态
+    for (int i = 0; i < state_count; i++)
+    {
+        if (states[i] == 0)
+            continue; // 跳过无效状态
         closure[i] = 1;
     }
 
     // 扩展闭包，处理所有通过epsilon转换的状态
     int changes;
-    do {
+    do
+    {
         changes = 0;
-        for (int i = 0; i < nfa->m; i++) {
-            if (closure[nfa->src[i]] && nfa->lb[i].n == 0) {  // epsilon transition
+        for (int i = 0; i < nfa->m; i++)
+        {
+            if (closure[nfa->src[i]] && nfa->lb[i].n == 0)
+            { // epsilon transition
                 int dst = nfa->dst[i];
-                if (!closure[dst]) {
+                if (!closure[dst])
+                {
                     closure[dst] = 1;
                     changes = 1;
                 }
             }
         }
-    } while (changes);  // 如果有变化，继续扩展
+    } while (changes); // 如果有变化，继续扩展
 
     return closure;
 }
 
 // move：返回在给定状态集合下，对某字符的移动后的新状态集合
-int *move(struct finite_automata *nfa, int *states, int state_count, char input) {
+int *move(struct finite_automata *nfa, int *states, int state_count, char input)
+{
     int *result = (int *)malloc(nfa->n * sizeof(int));
     memset(result, 0, nfa->n * sizeof(int));
 
-    for (int i = 0; i < state_count; i++) {
-        if (states[i] == 0) continue;  // 跳过无效状态
-        for (int e = nfa->adj[i]; e != -1; e = nfa->next[e]) {
-            if (nfa->lb[e].n == 0 || strchr(nfa->lb[e].c, input) != NULL) { // Epsilon 或匹配字符
+    for (int i = 0; i < state_count; i++)
+    {
+        if (states[i] == 0)
+            continue; // 跳过无效状态
+        for (int e = nfa->adj[i]; e != -1; e = nfa->next[e])
+        {
+            if (nfa->lb[e].n == 0 || strchr(nfa->lb[e].c, input) != NULL)
+            { // Epsilon 或匹配字符
                 result[nfa->dst[e]] = 1;
             }
         }
     }
-    
+
     // 计算新状态集合的epsilon闭包
     result = epsilon_closure(nfa, result, nfa->n);
-    
+
     return result;
 }
 
 // 比较两个状态集合，判断它们是否相同
-int compare_sets(int *setA, int *setB, int nfa_size) {
-    for (int i = 0; i < nfa_size; i++) {
-        if (setA[i] != setB[i]) {
-            return 0;  // 如果存在不同，返回0
+int compare_sets(int *setA, int *setB, int nfa_size)
+{
+    for (int i = 0; i < nfa_size; i++)
+    {
+        if (setA[i] != setB[i])
+        {
+            return 0; // 如果存在不同，返回0
         }
     }
-    return 1;  // 相同，返回1
+    return 1; // 相同，返回1
 }
 
 // 从状态集合生成DFA状态ID
-int generate_state_id(struct D_finite_automata *dfa, int *state_set, int state_count) {
-    for (int i = 0; i < dfa->n; i++) {
-        if (compare_sets(dfa->nodes[i].state, state_set, dfa->nodes[i].length)) {
+int generate_state_id(struct D_finite_automata *dfa, int *state_set, int state_count)
+{
+    for (int i = 0; i < dfa->n; i++)
+    {
+        if (compare_sets(dfa->nodes[i].state, state_set, dfa->nodes[i].length))
+        {
             return dfa->nodes[i].id;
         }
     }
@@ -347,14 +373,15 @@ int generate_state_id(struct D_finite_automata *dfa, int *state_set, int state_c
 }
 
 // nfa_to_dfa：将NFA转换为DFA
-struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa) {
+struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
+{
     struct D_finite_automata *dfa = create_dfa_empty_graph();
 
     // 使用一个数组来存储NFA状态集合，初始化为NFA的起始状态的epsilon闭包
     int *start_closure = (int *)malloc(nfa->n * sizeof(int));
     memset(start_closure, 0, nfa->n * sizeof(int));
-    start_closure[0] = 1;  // 假设NFA的起始状态是状态0，并加入到闭包
-    
+    start_closure[0] = 1; // 假设NFA的起始状态是状态0，并加入到闭包
+
     // 计算起始状态的epsilon闭包
     start_closure = epsilon_closure(nfa, start_closure, 1);
 
@@ -373,29 +400,35 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa) {
     int state_sets_size = 0;
 
     // 对DFA中的每个状态，遍历所有字符的转换
-    while (queue_head < queue_tail) {
+    while (queue_head < queue_tail)
+    {
         int current_state_id = state_queue[queue_head++];
-        
+
         // 对当前DFA状态，检查每一个字符
-        for (char c = 'a'; c <= 'z'; c++) {
+        for (char c = 'a'; c <= 'z'; c++)
+        {
             int *new_state = move(nfa, dfa->nodes[current_state_id].state, dfa->nodes[current_state_id].length, c);
-            
-            if (new_state != NULL) {
+
+            if (new_state != NULL)
+            {
                 // 判断新状态是否已经存在
                 int new_state_id = generate_state_id(dfa, new_state, nfa->n);
 
                 // 处理新的状态集合
                 int is_new_state = 1;
-                for (int i = 0; i < state_sets_size; i++) {
-                    if (compare_sets(state_sets[i], new_state, nfa->n)) {
+                for (int i = 0; i < state_sets_size; i++)
+                {
+                    if (compare_sets(state_sets[i], new_state, nfa->n))
+                    {
                         is_new_state = 0;
-                        new_state_id = i;  // 取已有状态的ID
+                        new_state_id = i; // 取已有状态的ID
                         break;
                     }
                 }
 
-                if (is_new_state) {
-                    //TODO: if the size of state_sets is not enough, realloc it
+                if (is_new_state)
+                {
+                    // TODO: if the size of state_sets is not enough, realloc it
                     state_sets[state_sets_size++] = new_state;
                     state_queue[queue_tail++] = new_state_id;
 
@@ -403,19 +436,24 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa) {
                     struct char_set *cs = (struct char_set *)malloc(sizeof(struct char_set));
                     cs->n = 1;
                     cs->c = (char *)malloc(sizeof(char));
-                    cs->c[0] = c;  // 将字符c作为边标签
+                    cs->c[0] = c; // 将字符c作为边标签
                     add_one_edge_to_dfa(dfa, current_state_id, new_state_id, cs);
-                } else {
+                }
+                else
+                {
                     // 如果新状态已经存在，则将字符添加到已有边的char_set中
                     int edge_id = -1;
-                    for (int e = dfa->adj[current_state_id]; e != -1; e = dfa->next[e]) {
-                        if (dfa->src[e] == current_state_id && dfa->dst[e] == new_state_id) {
+                    for (int e = dfa->adj[current_state_id]; e != -1; e = dfa->next[e])
+                    {
+                        if (dfa->src[e] == current_state_id && dfa->dst[e] == new_state_id)
+                        {
                             edge_id = e;
                             break;
                         }
                     }
 
-                    if (edge_id != -1) {
+                    if (edge_id != -1)
+                    {
                         // 将字符添加到已有边的char_set中
                         size_t len = dfa->lb[edge_id].n;
                         dfa->lb[edge_id].c = realloc(dfa->lb[edge_id].c, (len + 1) * sizeof(char));
@@ -439,223 +477,288 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa) {
     return dfa;
 }
 
-
-
-
-
-
 // run the dfa on the input string
-bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str) {
-    int current_state = 0;  // 假设初始状态是0
+bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str)
+{
+    int current_state = 0; // 假设初始状态是0
     int i = 0;
-    
-    while (str[i] != '\0') {
+
+    while (str[i] != '\0')
+    {
         char current_char = str[i];
         bool transition_found = false;
 
         // 遍历当前状态的所有邻接边
-        for (int edge = dfa->adj[current_state]; edge != -1; edge = dfa->next[edge]) {
+        for (int edge = dfa->adj[current_state]; edge != -1; edge = dfa->next[edge])
+        {
             // 获取边上的标签
             char *label = dfa->lb[edge].c;
-            
+
             // 如果当前字符在标签集中，则进行转移
-            if (label != NULL && label[current_state]) {
-                current_state = dfa->dst[edge];  // 转移到目标状态
+            if (label != NULL && label[current_state])
+            {
+                current_state = dfa->dst[edge]; // 转移到目标状态
                 transition_found = true;
                 break;
             }
         }
 
-        if (!transition_found) {
-            return false;  // 如果没有找到合法的转移，说明无法接受
+        if (!transition_found)
+        {
+            return false; // 如果没有找到合法的转移，说明无法接受
         }
 
-        i++;  // 处理下一个字符
+        i++; // 处理下一个字符
     }
 
     // 最后检查当前状态是否是接受状态
-    if (dfa->accepting[current_state] == 1) {
+    if (dfa->accepting[current_state] == 1)
+    {
         return true;
     }
     return false;
 }
 
-
-struct frontend_regexp *parse_regex(char *ori_str, int len) {
-    char *str = (char *)malloc(len+1);
+struct frontend_regexp *parse_regex(char *ori_str, int len)
+{
+    char *str = (char *)malloc(len + 1);
     strncpy(str, ori_str, len);
     str[len] = '\0';
     // printf("parse_regex: %d: %s\n", len, str);
-    int r=0;
+    int r = 0;
     struct frontend_regexp *fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
-    
-    if (len == 1) {
+
+    if (len == 1)
+    {
         return TFr_SingleChar(str[0]);
     }
 
     int small_bracket = 0;
-    for (; r<len; ++r) {
-        if (str[r] == '(') {
+    for (; r < len; ++r)
+    {
+        if (str[r] == '(')
+        {
             small_bracket++;
-        } else if (str[r] == ')') {
+        }
+        else if (str[r] == ')')
+        {
             small_bracket--;
-        } else if (str[r] == '|' && small_bracket == 0) {
+        }
+        else if (str[r] == '|' && small_bracket == 0)
+        {
             fr->t = T_FR_UNION;
             fr->d.UNION.r1 = parse_regex(str, r);
-            fr->d.UNION.r2 = parse_regex(str+r+1, len-r-1);
+            fr->d.UNION.r2 = parse_regex(str + r + 1, len - r - 1);
             return fr;
         }
     }
     // 最外围没有 | 的情况
     // 1. 第一个括号是()包围, 以及紧随着的 * + ? 三种情况
-    if (str[0] == '(') {
-        int p=0;
+    if (str[0] == '(')
+    {
+        int p = 0;
         small_bracket = 0;
-        while (p < len) {   // 找到匹配的另一半括号
-            if (str[p] == '(') small_bracket++;
-            else if (str[p] == ')' && small_bracket == 1) break;
-            else if (str[p] == ')') small_bracket--;
+        while (p < len)
+        { // 找到匹配的另一半括号
+            if (str[p] == '(')
+                small_bracket++;
+            else if (str[p] == ')' && small_bracket == 1)
+                break;
+            else if (str[p] == ')')
+                small_bracket--;
             p++;
         }
-        if (p == len-1) {   // 整体就是一个括号 直接去除首尾
-            return parse_regex(str+1, len-2);
-        } else if (p == len-2) {    // 整体是一个括号 加 情况符
-            if (str[len-1] == '*') {
+        if (p == len - 1)
+        { // 整体就是一个括号 直接去除首尾
+            return parse_regex(str + 1, len - 2);
+        }
+        else if (p == len - 2)
+        { // 整体是一个括号 加 情况符
+            if (str[len - 1] == '*')
+            {
                 fr->t = T_FR_STAR;
-                fr->d.STAR.r = parse_regex(str+1, len-3);
-            } else if (str[len-1] == '+') {
+                fr->d.STAR.r = parse_regex(str + 1, len - 3);
+            }
+            else if (str[len - 1] == '+')
+            {
                 fr->t = T_FR_PLUS;
-                fr->d.PLUS.r = parse_regex(str+1, len-3);
-            } else if (str[len-1] == '?') {
+                fr->d.PLUS.r = parse_regex(str + 1, len - 3);
+            }
+            else if (str[len - 1] == '?')
+            {
                 fr->t = T_FR_OPTIONAL;
-                fr->d.OPTION.r = parse_regex(str+1, len-3);
-            } else {    // 最后一位是单独字符
+                fr->d.OPTION.r = parse_regex(str + 1, len - 3);
+            }
+            else
+            { // 最后一位是单独字符
                 struct frontend_regexp *other_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
                 other_fr->t = T_FR_SINGLE_CHAR;
-                other_fr->d.SINGLE_CHAR.c = str[len-1];
+                other_fr->d.SINGLE_CHAR.c = str[len - 1];
                 fr->t = T_FR_CONCAT;
-                fr->d.CONCAT.r1 = parse_regex(str+1, len-3);
+                fr->d.CONCAT.r1 = parse_regex(str + 1, len - 3);
                 fr->d.CONCAT.r2 = other_fr;
             }
             return fr;
-        } else {    // 不是最后的括号包围
+        }
+        else
+        { // 不是最后的括号包围
             fr->t = T_FR_CONCAT;
-            if (str[p+1]=='*' || str[p+1]=='+' || str[p+1]=='?') {
-                fr->d.CONCAT.r1 = parse_regex(str, p+2);
-                fr->d.CONCAT.r2 = parse_regex(str+p+2, len-p-2);
-            } else {    // 只有一对括号没有情况符 则去除括号
-                fr->d.CONCAT.r1 = parse_regex(str+1, p-1);
-                fr->d.CONCAT.r2 = parse_regex(str+p+1, len-p-1);
+            if (str[p + 1] == '*' || str[p + 1] == '+' || str[p + 1] == '?')
+            {
+                fr->d.CONCAT.r1 = parse_regex(str, p + 2);
+                fr->d.CONCAT.r2 = parse_regex(str + p + 2, len - p - 2);
+            }
+            else
+            { // 只有一对括号没有情况符 则去除括号
+                fr->d.CONCAT.r1 = parse_regex(str + 1, p - 1);
+                fr->d.CONCAT.r2 = parse_regex(str + p + 1, len - p - 1);
             }
             return fr;
         }
     }
     // 2. 第一个括号是[]包围, 以及紧随着的 * + ? 三种情况
-    if (str[0] == '[') {
-        int p=0;
+    if (str[0] == '[')
+    {
+        int p = 0;
         int mid_bracket = 0;
-        while (p < len) {
-            if (str[p] == '[') mid_bracket++;
-            else if (str[p] == ']' && mid_bracket == 1) break;
-            else if (str[p] == ']') mid_bracket--;
+        while (p < len)
+        {
+            if (str[p] == '[')
+                mid_bracket++;
+            else if (str[p] == ']' && mid_bracket == 1)
+                break;
+            else if (str[p] == ']')
+                mid_bracket--;
             p++;
         }
-        char *c = (char *)malloc(p-1);
-        strncpy(c, str+1, p-1);
-        c[p-1] = '\0';
+        char *c = (char *)malloc(p - 1);
+        strncpy(c, str + 1, p - 1);
+        c[p - 1] = '\0';
         struct char_set *cs = (struct char_set *)malloc(sizeof(struct char_set));
-        cs->n = p-1;
+        cs->n = p - 1;
         cs->c = c;
         // printf("Input regex: \"%s\"\n", c);
-        if (p == len-1) {   // 整体就是一个括号 直接去除首尾
+        if (p == len - 1)
+        { // 整体就是一个括号 直接去除首尾
             fr->t = T_FR_CHAR_SET;
             fr->d.CHAR_SET = *cs;
             return fr;
-        } else if (p == len-2) {    // 整体是一个括号 加 特殊符/单字符
-            if (str[len-1] == '*') {
+        }
+        else if (p == len - 2)
+        { // 整体是一个括号 加 特殊符/单字符
+            if (str[len - 1] == '*')
+            {
                 fr->t = T_FR_STAR;
                 fr->d.STAR.r = TFr_CharSet(cs);
-            } else if (str[len-1] == '+') {
+            }
+            else if (str[len - 1] == '+')
+            {
                 fr->t = T_FR_PLUS;
                 fr->d.PLUS.r = TFr_CharSet(cs);
-            } else if (str[len-1] == '?') {
+            }
+            else if (str[len - 1] == '?')
+            {
                 fr->t = T_FR_OPTIONAL;
                 fr->d.OPTION.r = TFr_CharSet(cs);
-            } else { // 最后一位是单独字符
+            }
+            else
+            { // 最后一位是单独字符
                 struct frontend_regexp *other_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
                 other_fr->t = T_FR_SINGLE_CHAR;
-                other_fr->d.SINGLE_CHAR.c = str[len-1];
+                other_fr->d.SINGLE_CHAR.c = str[len - 1];
                 fr->t = T_FR_CONCAT;
                 fr->d.CONCAT.r1 = TFr_CharSet(cs);
                 fr->d.CONCAT.r2 = other_fr;
             }
             return fr;
-        } else {    // 不是最后的括号包围
+        }
+        else
+        { // 不是最后的括号包围
             fr->t = T_FR_CONCAT;
             // printf("charset in []: %s\n", c);
             struct frontend_regexp *other_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
-            if (str[p+1]=='*') {
+            if (str[p + 1] == '*')
+            {
                 other_fr->t = T_FR_STAR;
                 other_fr->d.STAR.r = TFr_CharSet(cs);
                 fr->d.CONCAT.r1 = other_fr;
-                fr->d.CONCAT.r2 = parse_regex(str+p+2, len-p-2);
-            } else if (str[p+1]=='+') {
+                fr->d.CONCAT.r2 = parse_regex(str + p + 2, len - p - 2);
+            }
+            else if (str[p + 1] == '+')
+            {
                 other_fr->t = T_FR_PLUS;
                 other_fr->d.PLUS.r = TFr_CharSet(cs);
                 fr->d.CONCAT.r1 = other_fr;
-                fr->d.CONCAT.r2 = parse_regex(str+p+2, len-p-2);
-            } else if (str[p+1]=='?') {
+                fr->d.CONCAT.r2 = parse_regex(str + p + 2, len - p - 2);
+            }
+            else if (str[p + 1] == '?')
+            {
                 other_fr->t = T_FR_OPTIONAL;
                 other_fr->d.OPTION.r = TFr_CharSet(cs);
                 fr->d.CONCAT.r1 = other_fr;
-                fr->d.CONCAT.r2 = parse_regex(str+p+2, len-p-2);
-            } else {
+                fr->d.CONCAT.r2 = parse_regex(str + p + 2, len - p - 2);
+            }
+            else
+            {
                 fr->d.CONCAT.r1 = TFr_CharSet(cs);
-                fr->d.CONCAT.r2 = parse_regex(str+p+1, len-p-1);
+                fr->d.CONCAT.r2 = parse_regex(str + p + 1, len - p - 1);
             }
             return fr;
         }
     }
     // 3. 第一个是字符, 则直到括号出现之前都视为string
-    if (str[0]!='(' && str[0]!='[') {
-        int p=0;
-        while (p<len && str[p]!='(' && str[p]!='['
-                && str[p]!='+' && str[p]!='*' && str[p]!='?') ++p;
-        if (p == len) {   // 整体是一个字符串
+    if (str[0] != '(' && str[0] != '[')
+    {
+        int p = 0;
+        while (p < len && str[p] != '(' && str[p] != '[' && str[p] != '+' && str[p] != '*' && str[p] != '?')
+            ++p;
+        if (p == len)
+        { // 整体是一个字符串
             fr->t = T_FR_STRING;
             fr->d.STRING.s = str;
-        } else if (str[p] == '[' || str[p] == '(') {
-            char *s = (char *)malloc(p+1);
-            strncpy(s, str, p); s[p] = '\0';
+        }
+        else if (str[p] == '[' || str[p] == '(')
+        {
+            char *s = (char *)malloc(p + 1);
+            strncpy(s, str, p);
+            s[p] = '\0';
             struct frontend_regexp *other_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
             other_fr->t = T_FR_STRING;
             other_fr->d.STRING.s = s;
             fr->t = T_FR_CONCAT;
             fr->d.CONCAT.r1 = other_fr;
-            fr->d.CONCAT.r2 = parse_regex(str+p, len-p);
-        } else {    // + * ? 针对单字符的情况
-            struct frontend_regexp *string_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));  // 记录之前的string
+            fr->d.CONCAT.r2 = parse_regex(str + p, len - p);
+        }
+        else
+        {                                                                                                         // + * ? 针对单字符的情况
+            struct frontend_regexp *string_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp)); // 记录之前的string
             char *s = (char *)malloc(p);
-            strncpy(s, str, p-1); s[p-1] = '\0';
+            strncpy(s, str, p - 1);
+            s[p - 1] = '\0';
             string_fr->t = T_FR_STRING;
             string_fr->d.STRING.s = s;
-            struct frontend_regexp *single_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));  // 记录最后单个有特殊情况的字符
+            struct frontend_regexp *single_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp)); // 记录最后单个有特殊情况的字符
             single_fr->t = T_FR_SINGLE_CHAR;
-            single_fr->d.SINGLE_CHAR.c = str[p-1];
-            struct frontend_regexp *concat_fr_1 = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));    // 用于连接前面两部分
+            single_fr->d.SINGLE_CHAR.c = str[p - 1];
+            struct frontend_regexp *concat_fr_1 = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp)); // 用于连接前面两部分
             concat_fr_1->t = T_FR_CONCAT;
             concat_fr_1->d.CONCAT.r1 = string_fr;
-            if (str[p] == '*') {
+            if (str[p] == '*')
+            {
                 struct frontend_regexp *star_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
                 star_fr->t = T_FR_STAR;
                 star_fr->d.STAR.r = single_fr;
                 concat_fr_1->d.CONCAT.r2 = star_fr;
-            } else if (str[p] == '+') {
+            }
+            else if (str[p] == '+')
+            {
                 struct frontend_regexp *plus_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
                 plus_fr->t = T_FR_PLUS;
                 plus_fr->d.PLUS.r = single_fr;
                 concat_fr_1->d.CONCAT.r2 = plus_fr;
-            } else if (str[p] == '?') {
+            }
+            else if (str[p] == '?')
+            {
                 struct frontend_regexp *option_fr = (struct frontend_regexp *)malloc(sizeof(struct frontend_regexp));
                 option_fr->t = T_FR_OPTIONAL;
                 option_fr->d.OPTION.r = single_fr;
@@ -663,7 +766,7 @@ struct frontend_regexp *parse_regex(char *ori_str, int len) {
             }
             fr->t = T_FR_CONCAT;
             fr->d.CONCAT.r1 = concat_fr_1;
-            fr->d.CONCAT.r2 = parse_regex(str+p+1, len-p-1);
+            fr->d.CONCAT.r2 = parse_regex(str + p + 1, len - p - 1);
         }
         return fr;
     }

@@ -169,3 +169,29 @@ int add_one_regexp(struct finite_automata *g, struct simpl_regexp *r, int start)
     }
     return end_v;
 }
+
+void regexp_to_NFA(struct finite_automata *g, struct simpl_regexp *r, int start)
+{
+    int end_v = add_one_regexp(g, r, start);
+    g->accepting[end_v] = 1;
+}
+
+void print_NFA(struct finite_automata *g)
+{
+    printf("Printed NFA:\n");
+    int p = 0;
+    while (g->adj[p] != -1)
+    {
+        int e = g->adj[p];
+        printf("%d-%s->%d\n", p, g->lb[e].c, g->dst[e]);
+        while (g->next[e] != -1)
+        {
+            e = g->next[e];
+            printf("%d-%s->%d\n", p, g->lb[e].c, g->dst[e]);
+        }
+        p++;
+    }
+    for (int i = 0; i <= p; i++)
+        if (g->accepting[i] == 1)
+            printf("The ending state is %d\n", i);
+}

@@ -195,8 +195,12 @@ int main()
         readString(input, sizeof(input), &input_len);
 
         struct finite_automata *nfa = create_empty_graph();
-        add_one_regexp(nfa, simplified, 0);
+
+        regexp_to_NFA(nfa, simplified, 0);
+        print_NFA(nfa);
+
         struct D_finite_automata *dfa = nfa_to_dfa(nfa);
+
         bool accept = dfa_accepts_string(dfa, input);
         printf("[Accept]: %s\n", accept ? "true" : "false");
     }
