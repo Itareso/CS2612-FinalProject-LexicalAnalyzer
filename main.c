@@ -200,7 +200,7 @@ int main()
         print_NFA(nfa);
 
         struct D_finite_automata *dfa = nfa_to_dfa(nfa);
-
+        print_DFA(dfa);
         bool accept = dfa_accepts_string(dfa, input);
         printf("[Accept]: %s\n", accept ? "true" : "false");
     }

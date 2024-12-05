@@ -162,6 +162,7 @@ int *epsilon_closure(struct finite_automata *nfa, int *states, int state_count) 
 // int match_string_with_dfa(struct finite_automata *dfa, const char *input_string);
 
 bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str);
+void print_DFA(struct D_finite_automata *g);
 struct frontend_regexp *parse_regex(char *ori_str, int len);
 
 #endif // LANG_H_INCLUDED

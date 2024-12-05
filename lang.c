@@ -217,6 +217,7 @@ struct D_finite_automata *create_dfa_empty_graph()
     fa->dst = (int *)malloc(fa->array_size * sizeof(int));
     fa->adj = (int *)malloc(fa->array_size * sizeof(int));
     fa->next = (int *)malloc(fa->array_size * sizeof(int));
+    fa->accepting = (int *)malloc(fa->array_size * sizeof(int));
     fa->lb = (struct char_set *)malloc(fa->array_size * sizeof(struct char_set));
     fa->nodes = (struct dfa_node *)malloc(fa->array_size * sizeof(struct dfa_node));
 
@@ -234,6 +235,7 @@ int add_one_vertex_to_dfa(struct D_finite_automata *g)
         g->dst = realloc(g->dst, g->array_size * sizeof(int));
         g->adj = realloc(g->adj, g->array_size * sizeof(int));
         g->next = realloc(g->next, g->array_size * sizeof(int));
+        g->accepting = realloc(g->next, g->array_size * sizeof(int));
         g->lb = realloc(g->lb, g->array_size * sizeof(struct char_set));
         g->nodes = realloc(g->nodes, g->array_size * sizeof(struct dfa_node));
     }
@@ -252,6 +254,7 @@ int add_one_edge_to_dfa(struct D_finite_automata *g, int src, int dst, struct ch
         g->dst = realloc(g->dst, g->array_size * sizeof(int));
         g->adj = realloc(g->adj, g->array_size * sizeof(int));
         g->next = realloc(g->next, g->array_size * sizeof(int));
+        g->accepting = realloc(g->next, g->array_size * sizeof(int));
         g->lb = realloc(g->lb, g->array_size * sizeof(struct char_set));
         g->nodes = realloc(g->nodes, g->array_size * sizeof(struct dfa_node));
     }
@@ -326,7 +329,7 @@ int *move(struct finite_automata *nfa, int *states, int state_count, char input)
             continue; // 跳过无效状态
         for (int e = nfa->adj[i]; e != -1; e = nfa->next[e])
         {
-            if (nfa->lb[e].n == 0 || strchr(nfa->lb[e].c, input) != NULL)
+            if (strchr(nfa->lb[e].c, input) != NULL)
             { // Epsilon 或匹配字符
                 result[nfa->dst[e]] = 1;
             }
@@ -405,9 +408,24 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
         int current_state_id = state_queue[queue_head++];
 
         // 对当前DFA状态，检查每一个字符
-        for (char c = 'a'; c <= 'z'; c++)
+        for (char c = 'a'; c <= 'z'; c++)//TODO: 从'a'到'z'遍历所有字符
         {
             int *new_state = move(nfa, dfa->nodes[current_state_id].state, dfa->nodes[current_state_id].length, c);
+            // print_state(new_state, nfa->n);
+
+            bool flag = false;
+            for (int i = 0; i < nfa->n; i++)
+            {
+                if (new_state[i] == 1)
+                {
+                    flag = true;
+                    break;
+                }
+            }
+            if (!flag)
+            {
+                continue;
+            }
 
             if (new_state != NULL)
             {
@@ -465,16 +483,66 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
         }
     }
 
-    // // 处理DFA的接受状态
-    // for (int i = 0; i < dfa->n; i++) {
-    //     for (int j = 0; j < nfa->n; j++) {
-    //         if (nfa->accepting[j] && compare_sets(dfa->nodes[i].state, &j, 1)) {
-    //             dfa->accepting[i] = 1;  // 设置DFA接受状态
-    //         }
-    //     }
-    // }
+    // 处理DFA的接受状态
+    for (int i = 0; i < dfa->n; i++)
+    {
+        for (int j = 0; j < nfa->n; j++)
+        {
+            if (dfa->nodes[i].state[j] == 1 && nfa->accepting[j] == 1)
+            {
+                dfa->accepting[i] = 1;
+                break;
+            }
+        }
+    }
 
     return dfa;
+}
+
+void print_state(int *state, int n)
+{
+    for (int i = 0; i < n; i++)
+    {
+        if (state[i] == 1)
+        {
+            printf("%d ", i);
+        }
+    }
+    printf("\n");
+}
+
+void print_DFA(struct D_finite_automata *g)
+{
+    printf("Printed DFA:\n");
+    int p = 0;
+    while (p < g->n)
+    {   
+        if (g->adj[p] == -1)
+        {
+            p++;
+            continue;
+        }
+        int e = g->adj[p];
+        printf("%d: ", e);
+        print_state(g->nodes[e].state, g->nodes[e].length);
+        printf("%d-%s->%d\n", p, g->lb[e].c, g->dst[e]);
+        while (g->next[e] != -1)
+        {
+            e = g->next[e];
+            printf("%d: ", e);
+            print_state(g->nodes[e].state, g->nodes[e].length);
+            printf("%d-%s->%d\n", p, g->lb[e].c, g->dst[e]);
+        }
+        e = g->dst[e];
+        printf("%d: ", e);
+        print_state(g->nodes[e].state, g->nodes[e].length);
+        p++;
+
+    }
+    for (int i = 0; i <= p; i++)
+        if (g->accepting[i] == 1)
+            printf("The ending state is %d\n", i);
+    printf("\n");
 }
 
 // run the dfa on the input string
@@ -494,8 +562,19 @@ bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str)
             // 获取边上的标签
             char *label = dfa->lb[edge].c;
 
+            bool flag = false;
+
+            for (int j = 0; j < dfa->lb[edge].n; j++)
+            {
+                if (label[j] == current_char)
+                {
+                    flag = true;
+                    break;
+                }
+            }
+
             // 如果当前字符在标签集中，则进行转移
-            if (label != NULL && label[current_state])
+            if (flag)
             {
                 current_state = dfa->dst[edge]; // 转移到目标状态
                 transition_found = true;
@@ -510,7 +589,6 @@ bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str)
 
         i++; // 处理下一个字符
     }
-
     // 最后检查当前状态是否是接受状态
     if (dfa->accepting[current_state] == 1)
     {
