@@ -195,9 +195,9 @@ int main()
         struct frontend_regexp *tree = parse_regex(regex, len);
         printf("[Regex Tree]\n");
         printTree(tree, 0);
-        // struct simpl_regexp *simplified = simplify_regexp(tree);
-        // printf("[Simplified Regex Tree]\n");
-        // printSimplifiedTree(simplified, 0);
+        struct simpl_regexp *simplified = simplify_regexp(tree);
+        printf("[Simplified Regex Tree]\n");
+        printSimplifiedTree(simplified, 0);
     }
     return 0;
 }
