@@ -90,7 +90,7 @@ void printTree(struct frontend_regexp *node, int level)
         break;
 
     case T_FR_STRING:
-        printf("STRING: \"%s\"\n", node->d.STRING.s);
+        printf("STRING: %s\n", node->d.STRING.s);
         break;
 
     case T_FR_SINGLE_CHAR:
@@ -172,20 +172,9 @@ int main()
 
     while (true)
     {
-        // printf(">>> ");
-        // scanf("%d", &len);
-        // if (len <= 0) {     // 输入 0 退出
-        //     break;
-        // }
-        // getchar();
-        printf("Enter Regular Expressios(do not exceed 99 characters):\n");
         printf(">>> ");
         char regex[100];
         int len = 0;
-        // regex = (char *)malloc(len + 1);
-        // for (int i=0; i<len; i++) {
-        //     regex[i] = getchar();
-        // }
         readString(regex, sizeof(regex), &len);
 
         if (len == 0)
@@ -198,6 +187,18 @@ int main()
         struct simpl_regexp *simplified = simplify_regexp(tree);
         printf("[Simplified Regex Tree]\n");
         printSimplifiedTree(simplified, 0);
+
+        // 对指定字符串进行匹配
+        printf("(string to match) >>> ");
+        char input[100];
+        int input_len = 0;
+        readString(input, sizeof(input), &input_len);
+
+        struct finite_automata *nfa = create_empty_graph();
+        add_one_regexp(nfa, simplified, 0);
+        struct D_finite_automata *dfa = nfa_to_dfa(nfa);
+        bool accept = dfa_accepts_string(dfa, input);
+        printf("[Accept]: %s\n", accept ? "true" : "false");
     }
     return 0;
 }

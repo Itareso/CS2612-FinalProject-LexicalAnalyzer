@@ -481,8 +481,6 @@ bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str) {
 }
 
 
-// struct frontend_regexp *parse_regex(char *str, int len);
-
 struct frontend_regexp *parse_regex(char *ori_str, int len) {
     char *str = (char *)malloc(len+1);
     strncpy(str, ori_str, len);
@@ -512,7 +510,13 @@ struct frontend_regexp *parse_regex(char *ori_str, int len) {
     // 1. 第一个括号是()包围, 以及紧随着的 * + ? 三种情况
     if (str[0] == '(') {
         int p=0;
-        while (str[p] != ')') ++p;  // 找到另一半括号
+        small_bracket = 0;
+        while (p < len) {   // 找到匹配的另一半括号
+            if (str[p] == '(') small_bracket++;
+            else if (str[p] == ')' && small_bracket == 1) break;
+            else if (str[p] == ')') small_bracket--;
+            p++;
+        }
         if (p == len-1) {   // 整体就是一个括号 直接去除首尾
             return parse_regex(str+1, len-2);
         } else if (p == len-2) {    // 整体是一个括号 加 情况符
@@ -549,7 +553,13 @@ struct frontend_regexp *parse_regex(char *ori_str, int len) {
     // 2. 第一个括号是[]包围, 以及紧随着的 * + ? 三种情况
     if (str[0] == '[') {
         int p=0;
-        while (str[p] != ']') ++p;  // 找到另一半括号
+        int mid_bracket = 0;
+        while (p < len) {
+            if (str[p] == '[') mid_bracket++;
+            else if (str[p] == ']' && mid_bracket == 1) break;
+            else if (str[p] == ']') mid_bracket--;
+            p++;
+        }
         char *c = (char *)malloc(p-1);
         strncpy(c, str+1, p-1);
         c[p-1] = '\0';

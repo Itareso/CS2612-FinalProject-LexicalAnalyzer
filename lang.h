@@ -152,12 +152,12 @@ struct finite_automata *create_empty_graph();
 int add_one_vertex(struct finite_automata *g);                                     /* add a new vertex to the graph and return the id of the new vertex */
 int add_one_edge(struct finite_automata *g, int src, int dst, struct char_set *c); /* add a new edge to the graph and return the id of the new edge */
 
-// struct finite_automata *create_dfa_empty_graph();
-// int add_one_vertex_to_dfa(struct finite_automata *g);
-// int add_one_edge_to_dfa(struct finite_automata *g, int src, int dst, struct char_set *c);
+struct D_finite_automata *create_dfa_empty_graph();
+int add_one_vertex_to_dfa(struct D_finite_automata *g);
+int add_one_edge_to_dfa(struct D_finite_automata *g, int src, int dst, struct char_set *c);
 
-// int *move(struct finite_automata *nfa, int *states, struct char_set *input);
-// int *epsilon_closure(struct finite_automata *nfa, int *states) ;
+int *move(struct finite_automata *nfa, int *states, int state_count, char input);
+int *epsilon_closure(struct finite_automata *nfa, int *states, int state_count) ;
 // int get_dfa_next_state(struct finite_automata *dfa, int current_state, char input_char);
 // int match_string_with_dfa(struct finite_automata *dfa, const char *input_string);
 
