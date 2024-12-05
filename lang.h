@@ -6,12 +6,14 @@
 #include <string.h>
 #include <stdbool.h>
 
-struct char_set {
+struct char_set
+{
     char *c;
     unsigned int n; // if the edge is a epsilon edge, n = 0, otherwise n = 1
 };
 
-enum FrontendRegExpType {
+enum FrontendRegExpType
+{
     T_FR_CHAR_SET = 0,
     T_FR_OPTIONAL,
     T_FR_STAR,
@@ -22,30 +24,39 @@ enum FrontendRegExpType {
     T_FR_CONCAT
 };
 
-struct frontend_regexp {
+struct frontend_regexp
+{
     enum FrontendRegExpType t;
-    union {
+    union
+    {
         struct char_set CHAR_SET;
-        struct {
+        struct
+        {
             struct frontend_regexp *r;
         } OPTION;
-        struct {
+        struct
+        {
             struct frontend_regexp *r;
         } STAR;
-        struct {
+        struct
+        {
             struct frontend_regexp *r;
         } PLUS;
-        struct {
+        struct
+        {
             char *s;
         } STRING;
-        struct {
+        struct
+        {
             char c;
         } SINGLE_CHAR;
-        struct {
+        struct
+        {
             struct frontend_regexp *r1;
             struct frontend_regexp *r2;
         } UNION;
-        struct {
+        struct
+        {
             struct frontend_regexp *r1;
             struct frontend_regexp *r2;
         } CONCAT;
@@ -98,7 +109,7 @@ struct finite_automata
     struct char_set *lb; /* for every edge e, lb[e] are the transition lables on e, if the char set empty, the edge is an epsilon edge */
     int *adj;            /* for every vertex v, adj[v] is the first adjacent edge of v */
     int *next;           /* for every edge e, next[e] is the next neighbour edge of e, two edges are neighbours if they have the same src */
-    int *accepting; /* An array to indicate which DFA states are accepting states */
+    int *accepting;      /* An array to indicate which DFA states are accepting states */
 };
 
 struct dfa_node
@@ -118,7 +129,7 @@ struct D_finite_automata
     struct char_set *lb; /* for every edge e, lb[e] are the transition lables on e, if the char set empty, the edge is an epsilon edge */
     int *adj;            /* for every vertex v, adj[v] is the first adjacent edge of v */
     int *next;           /* for every edge e, next[e] is the next neighbour edge of e, two edges are neighbours if they have the same src */
-    int *accepting; /* An array to indicate which DFA states are accepting states */
+    int *accepting;      /* An array to indicate which DFA states are accepting states */
     struct dfa_node *nodes;
 };
 
@@ -145,13 +156,12 @@ int add_one_edge(struct finite_automata *g, int src, int dst, struct char_set *c
 // int add_one_vertex_to_dfa(struct finite_automata *g);
 // int add_one_edge_to_dfa(struct finite_automata *g, int src, int dst, struct char_set *c);
 
-
 // int *move(struct finite_automata *nfa, int *states, struct char_set *input);
 // int *epsilon_closure(struct finite_automata *nfa, int *states) ;
 // int get_dfa_next_state(struct finite_automata *dfa, int current_state, char input_char);
 // int match_string_with_dfa(struct finite_automata *dfa, const char *input_string);
 
 bool dfa_accepts_string(struct D_finite_automata *dfa, const char *str);
-
+struct frontend_regexp *parse_regex(char *ori_str, int len);
 
 #endif // LANG_H_INCLUDED
