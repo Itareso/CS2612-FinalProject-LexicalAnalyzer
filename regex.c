@@ -170,8 +170,9 @@ int add_one_regexp(struct finite_automata *g, struct simpl_regexp *r, int start)
     return end_v;
 }
 
-void regexp_to_NFA(struct finite_automata *g, struct simpl_regexp *r, int start)
+void regexp_to_NFA(struct finite_automata *g, struct simpl_regexp *r)
 {
+    int start = add_one_vertex(g);
     int end_v = add_one_regexp(g, r, start);
     g->accepting[end_v] = 1;
 }

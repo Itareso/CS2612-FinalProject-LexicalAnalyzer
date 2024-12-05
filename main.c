@@ -196,7 +196,7 @@ int main()
 
         struct finite_automata *nfa = create_empty_graph();
 
-        regexp_to_NFA(nfa, simplified, 0);
+        regexp_to_NFA(nfa, simplified);
         print_NFA(nfa);
 
         struct D_finite_automata *dfa = nfa_to_dfa(nfa);
