@@ -117,6 +117,7 @@ int add_one_regexp(struct finite_automata *g, struct simpl_regexp *r, int start)
 {
     int end_v;
     struct char_set emptycs = get_empty_charset();
+    // printf("now matching %d\n", r->t);
     switch (r->t)
     {
     case T_S_CHAR_SET:
@@ -125,24 +126,29 @@ int add_one_regexp(struct finite_automata *g, struct simpl_regexp *r, int start)
         int target_v = add_one_vertex(g);
         int edge = add_one_edge(g, start, target_v, &target_charset);
         end_v = target_v;
+        break;
     }
-    break;
+
     case T_S_STAR:
     {
         int mid_v = add_one_vertex(g);
         int target_v = add_one_regexp(g, r->d.STAR.r, mid_v);
         int edge1 = add_one_edge(g, start, target_v, &emptycs);
         int edge2 = add_one_edge(g, target_v, mid_v, &emptycs);
-        end_v = target_v;
+        int target_v_extend = add_one_vertex(g);
+        int edge3 = add_one_edge(g, target_v, target_v_extend, &emptycs);
+        end_v = target_v_extend;
+        break;
     }
-    break;
+
     case T_S_EMPTY_STR:
     {
         int target_v = add_one_vertex(g);
         int edge = add_one_edge(g, start, target_v, &emptycs);
         end_v = target_v;
+        break;
     }
-    break;
+
     case T_S_UNION:
     {
         int mid_v1 = add_one_vertex(g);
@@ -155,8 +161,9 @@ int add_one_regexp(struct finite_automata *g, struct simpl_regexp *r, int start)
         int mid_edge3 = add_one_edge(g, target_v1, target_v, &emptycs);
         int mid_edge4 = add_one_edge(g, target_v2, target_v, &emptycs);
         end_v = target_v;
+        break;
     }
-    break;
+
     case T_S_CONCAT:
     {
         int mid_v1 = add_one_regexp(g, r->d.CONCAT.r1, start);
@@ -164,8 +171,8 @@ int add_one_regexp(struct finite_automata *g, struct simpl_regexp *r, int start)
         int mid_edge = add_one_edge(g, mid_v1, mid_v2, &emptycs);
         int target_v = add_one_regexp(g, r->d.CONCAT.r2, mid_v2);
         end_v = target_v;
+        break;
     }
-    break;
     }
     return end_v;
 }
