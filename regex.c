@@ -46,6 +46,7 @@ struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
         cs.n = 1;
         cs.c = (char *)malloc(sizeof(char) * 2);
         strncpy(cs.c, r->d.STRING.s, 1);
+        cs.c[1] = '\0';
         schar->d.CHAR_SET = cs;
         if (strlen(r->d.STRING.s) == 1)
         {
@@ -63,6 +64,7 @@ struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
             cs2.n = 1;
             cs2.c = (char *)malloc(sizeof(char) * 2);
             strncpy(cs2.c, r->d.STRING.s + 1, 1);
+            cs2.c[1] = '\0';
             schar2->d.CHAR_SET = cs2;
             sr->d.CONCAT.r2 = schar2;
         }
