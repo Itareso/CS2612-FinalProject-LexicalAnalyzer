@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wno-unused-variable
+CFLAGS = -Wall -Wno-unused-variable -fsanitize=undefined -fsanitize=address -g
+LDFLAGS = -fsanitize=undefined -fsanitize=address
 OBJ = main.o regex.o lang.o
 EXEC = my_program.exe
 
@@ -8,7 +9,7 @@ EXEC = my_program.exe
 
 # 编译主程序
 $(EXEC): $(OBJ)
-	$(CC) $(OBJ) -o $(EXEC)
+	$(CC) $(OBJ) -o $(EXEC) $(LDFLAGS)
 
 # 编译 main.c
 main.o: main.c regex.h lang.h
