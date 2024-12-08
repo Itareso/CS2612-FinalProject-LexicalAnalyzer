@@ -165,15 +165,17 @@ void printSimplifiedTree(struct simpl_regexp *node, int level)
     }
 }
 
+char regex[100];
+char input[100];
+
 int main()
 {
-    char *regex;
     int len;
 
     while (true)
     {
         printf(">>> ");
-        char regex[100];
+        memset(regex, 0, sizeof(regex));
         int len = 0;
         readString(regex, sizeof(regex), &len);
 
@@ -190,7 +192,7 @@ int main()
 
         // 对指定字符串进行匹配
         printf("(string to match) >>> ");
-        char input[100];
+        memset(input, 0, sizeof(input));
         int input_len = 0;
         readString(input, sizeof(input), &input_len);
 
@@ -203,6 +205,7 @@ int main()
         print_DFA(dfa);
         bool accept = dfa_accepts_string(dfa, input);
         printf("[Accept]: %s\n", accept ? "true" : "false");
+
     }
     return 0;
 }
