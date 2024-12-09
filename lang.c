@@ -224,7 +224,7 @@ struct D_finite_automata *create_dfa_empty_graph()
 
     return fa;
 }
-add_one_vertex_to_dfa(struct D_finite_automata *g)
+int add_one_vertex_to_dfa(struct D_finite_automata *g)
 {
     int new_vertex_id = g->n;
     g->n++;
@@ -449,9 +449,9 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
                 if (is_new_edge)
                 {
                     // TODO: if the size of state_sets is not enough, realloc it
-                    if (state_sets_size>=dfa->array_size)
+                    if (state_sets_size >= dfa->array_size)
                     {
-                        dfa->array_size *=2;
+                        dfa->array_size *= 2;
                         state_sets = (int **)realloc(state_sets, dfa->array_size * sizeof(int *));
                         state_queue = (int *)realloc(state_queue, dfa->array_size * sizeof(int));
                     }

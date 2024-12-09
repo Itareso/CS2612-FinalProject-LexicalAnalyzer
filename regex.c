@@ -109,9 +109,8 @@ struct char_set get_empty_charset()
 {
     struct char_set empty;
     empty.n = 0;
-    char c[] = {'\0'};
-    char *p = c;
-    empty.c = p;
+    empty.c = (char *)malloc(sizeof(char));
+    empty.c[0] = '\0';
     return empty;
 }
 
