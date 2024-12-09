@@ -229,14 +229,14 @@ int add_one_vertex_to_dfa(struct D_finite_automata *g)
 {
     int new_vertex_id = g->n;
     g->n++;
-    if (g->n >= g->array_size)
+    if (g->n >= g->array_size-1)
     {
         g->array_size *= 2;
         g->src = realloc(g->src, g->array_size * sizeof(int));
         g->dst = realloc(g->dst, g->array_size * sizeof(int));
         g->adj = realloc(g->adj, g->array_size * sizeof(int));
         g->next = realloc(g->next, g->array_size * sizeof(int));
-        g->accepting = realloc(g->next, g->array_size * sizeof(int));
+        g->accepting = realloc(g->accepting, g->array_size * sizeof(int));
         g->lb = realloc(g->lb, g->array_size * sizeof(struct char_set));
         g->nodes = realloc(g->nodes, g->array_size * sizeof(struct dfa_node));
     }
@@ -248,14 +248,14 @@ int add_one_edge_to_dfa(struct D_finite_automata *g, int src, int dst, struct ch
 {
     int new_edge_id = g->m;
     g->m++;
-    if (g->m >= g->array_size)
+    if (g->m >= g->array_size-1)
     {
         g->array_size *= 2;
         g->src = realloc(g->src, g->array_size * sizeof(int));
         g->dst = realloc(g->dst, g->array_size * sizeof(int));
         g->adj = realloc(g->adj, g->array_size * sizeof(int));
         g->next = realloc(g->next, g->array_size * sizeof(int));
-        g->accepting = realloc(g->next, g->array_size * sizeof(int));
+        g->accepting = realloc(g->accepting, g->array_size * sizeof(int));
         g->lb = realloc(g->lb, g->array_size * sizeof(struct char_set));
         g->nodes = realloc(g->nodes, g->array_size * sizeof(struct dfa_node));
     }
@@ -451,7 +451,6 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
                 if (is_new_edge)
                 {
                     // printf("test2");
-                    //  TODO: if the size of state_sets is not enough, realloc it
                     if (state_sets_size >= size)
                     {
                         size *= 2;
