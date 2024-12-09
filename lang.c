@@ -224,7 +224,7 @@ struct D_finite_automata *create_dfa_empty_graph()
 
     return fa;
 }
-add_one_vertex_to_dfa(struct D_finite_automata *g)
+int add_one_vertex_to_dfa(struct D_finite_automata *g)
 {
     int new_vertex_id = g->n;
     g->n++;
@@ -378,7 +378,7 @@ int generate_state_id(struct D_finite_automata *dfa, int *state_set, int state_c
 struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
 {
     struct D_finite_automata *dfa = create_dfa_empty_graph();
-    
+
     int size = 100;
     // 使用一个数组来存储NFA状态集合，初始化为NFA的起始状态的epsilon闭包
     int *start_closure = (int *)malloc(nfa->n * sizeof(int));
@@ -390,7 +390,7 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
     // print_state(start_closure, nfa->n);
     //  将起始状态的epsilon闭包加入DFA
     int start_state_id = generate_state_id(dfa, start_closure, nfa->n);
-    
+
     // DFA状态队列，用于遍历DFA的每个状态
     int *state_queue = (int *)malloc(size * sizeof(int));
     int queue_head = 0, queue_tail = 0;
@@ -446,13 +446,13 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
                         }
                     }
                 }
-                                
+
                 if (is_new_edge)
                 {
                     // TODO: if the size of state_sets is not enough, realloc it
-                    if (state_sets_size>=size)
+                    if (state_sets_size >= size)
                     {
-                        size *=2;
+                        size *= 2;
                         state_sets = (int **)realloc(state_sets, size * sizeof(int *));
                         state_queue = (int *)realloc(state_queue, size * sizeof(int));
                     }
@@ -462,9 +462,9 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
                     // 为DFA添加边
                     struct char_set *cs = (struct char_set *)malloc(sizeof(struct char_set));
                     cs->n = 1;
-                    cs->c = (char *)malloc(sizeof(char)+1);
+                    cs->c = (char *)malloc(sizeof(char) + 1);
                     cs->c[0] = c; // 将字符c作为边标签
-                    cs->c[1]='\0';
+                    cs->c[1] = '\0';
                     add_one_edge_to_dfa(dfa, current_state_id, new_state_id, cs);
                 }
                 else
@@ -486,7 +486,7 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
                         size_t len = dfa->lb[edge_id].n;
                         dfa->lb[edge_id].c = realloc(dfa->lb[edge_id].c, (len + 2) * sizeof(char));
                         dfa->lb[edge_id].c[len] = c;
-                        dfa->lb[edge_id].c[len+1] = '\0';
+                        dfa->lb[edge_id].c[len + 1] = '\0';
                         dfa->lb[edge_id].n += 1;
                     }
                 }
@@ -526,8 +526,7 @@ void print_DFA(struct D_finite_automata *g)
     printf("Printed DFA:\n");
     int p = 0;
 
-
-    printf("print g->n:%d",g->n);
+    printf("print g->n:%d", g->n);
     while (p < g->n)
     {
         if (g->adj[p] == -1)
