@@ -408,7 +408,7 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
         int current_state_id = state_queue[queue_head++];
         // printf("%d",current_state_id);
         //  对当前DFA状态，检查每一个字符
-        for (char c = 33; c <= 126; c++) // TODO: 从'a'到'z'遍历所有字符
+        for (char c = 'a'; c <= 'z'; c++) // TODO: 从'a'到'z'遍历所有字符
         {
             int *new_state = move(nfa, dfa->nodes[current_state_id].state, dfa->nodes[current_state_id].length, c);
             // print_state(new_state, nfa->n);
@@ -438,7 +438,7 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
                 {
                     for (int edge = dfa->adj[i]; edge != -1; edge = dfa->next[edge])
                     {
-                        if (dfa->src[edge] == current_state_id && dfa->dst[edge] == new_state_id && strchr(dfa->lb[edge].c, c)!=NULL)
+                        if (dfa->src[edge] == current_state_id && dfa->dst[edge] == new_state_id)
                         {
                             is_new_edge = 0;
                             new_state_id = edge; // 取已有边的ID
@@ -449,6 +449,7 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
 
                 if (is_new_edge)
                 {
+                    //printf("test2");
                     // TODO: if the size of state_sets is not enough, realloc it
                     if (state_sets_size >= size)
                     {
@@ -469,25 +470,14 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
                 }
                 else
                 {
-                    // 如果新边已经存在，则将字符添加到已有边的char_set中
-                    int edge_id = -1;
-                    for (int e = dfa->adj[current_state_id]; e != -1; e = dfa->next[e])
-                    {
-                        if (dfa->src[e] == current_state_id && dfa->dst[e] == new_state_id)
-                        {
-                            edge_id = e;
-                            break;
-                        }
-                    }
-
-                    if (edge_id != -1)
+                    if (strchr(dfa->lb[new_state_id].c,c) == NULL)
                     {
                         // 将字符添加到已有边的char_set中
-                        size_t len = dfa->lb[edge_id].n;
-                        dfa->lb[edge_id].c = realloc(dfa->lb[edge_id].c, (len + 2) * sizeof(char));
-                        dfa->lb[edge_id].c[len] = c;
-                        dfa->lb[edge_id].c[len + 1] = '\0';
-                        dfa->lb[edge_id].n += 1;
+                        size_t len = dfa->lb[new_state_id].n;
+                        dfa->lb[new_state_id].c = realloc(dfa->lb[new_state_id].c, (len + 2) * sizeof(char));
+                        dfa->lb[new_state_id].c[len] = c;
+                        dfa->lb[new_state_id].c[len + 1] = '\0';
+                        dfa->lb[new_state_id].n += 1;
                     }
                 }
             }
