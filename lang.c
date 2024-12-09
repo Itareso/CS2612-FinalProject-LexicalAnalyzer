@@ -160,7 +160,7 @@ int add_one_vertex(struct finite_automata *g)
     int new_vertex_id = g->n;
     // printf("now adding vertex %d\n", g->n);
     g->n++;
-    if (g->n >= g->array_size)
+    if (g->n >= g->array_size - 1)
     {
         g->array_size *= 2;
         g->src = realloc(g->src, g->array_size * sizeof(int));
@@ -168,7 +168,7 @@ int add_one_vertex(struct finite_automata *g)
         g->adj = realloc(g->adj, g->array_size * sizeof(int));
         g->next = realloc(g->next, g->array_size * sizeof(int));
         g->lb = realloc(g->lb, g->array_size * sizeof(struct char_set));
-        g->accepting = realloc(g->next, g->array_size * sizeof(int));
+        g->accepting = realloc(g->accepting, g->array_size * sizeof(int));
     }
     g->adj[new_vertex_id] = -1;
     g->accepting[new_vertex_id] = 0;
@@ -178,8 +178,9 @@ int add_one_vertex(struct finite_automata *g)
 int add_one_edge(struct finite_automata *g, int src, int dst, struct char_set *c)
 {
     int new_edge_id = g->m;
+    // printf("new edge id %d\n", new_edge_id);
     g->m++;
-    if (g->m >= g->array_size)
+    if (g->m >= g->array_size - 1)
     {
         g->array_size *= 2;
         g->src = realloc(g->src, g->array_size * sizeof(int));
@@ -187,7 +188,7 @@ int add_one_edge(struct finite_automata *g, int src, int dst, struct char_set *c
         g->adj = realloc(g->adj, g->array_size * sizeof(int));
         g->next = realloc(g->next, g->array_size * sizeof(int));
         g->lb = realloc(g->lb, g->array_size * sizeof(struct char_set));
-        g->accepting = realloc(g->next, g->array_size * sizeof(int));
+        g->accepting = realloc(g->accepting, g->array_size * sizeof(int));
     }
     g->src[new_edge_id] = src;
     g->dst[new_edge_id] = dst;
@@ -449,8 +450,8 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
 
                 if (is_new_edge)
                 {
-                    //printf("test2");
-                    // TODO: if the size of state_sets is not enough, realloc it
+                    // printf("test2");
+                    //  TODO: if the size of state_sets is not enough, realloc it
                     if (state_sets_size >= size)
                     {
                         size *= 2;
@@ -470,7 +471,7 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
                 }
                 else
                 {
-                    if (strchr(dfa->lb[new_state_id].c,c) == NULL)
+                    if (strchr(dfa->lb[new_state_id].c, c) == NULL)
                     {
                         // 将字符添加到已有边的char_set中
                         size_t len = dfa->lb[new_state_id].n;
