@@ -408,7 +408,7 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
         int current_state_id = state_queue[queue_head++];
         // printf("%d",current_state_id);
         //  对当前DFA状态，检查每一个字符
-        for (char c = 'a'; c <= 'z'; c++) // TODO: 从'a'到'z'遍历所有字符
+        for (char c = 33; c <= 126; c++) // TODO: 从'a'到'z'遍历所有字符
         {
             int *new_state = move(nfa, dfa->nodes[current_state_id].state, dfa->nodes[current_state_id].length, c);
             // print_state(new_state, nfa->n);
