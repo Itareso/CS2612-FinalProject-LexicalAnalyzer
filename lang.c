@@ -438,7 +438,7 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
                 {
                     for (int edge = dfa->adj[i]; edge != -1; edge = dfa->next[edge])
                     {
-                        if (dfa->src[edge] == current_state_id && dfa->dst[edge] == new_state_id)
+                        if (dfa->src[edge] == current_state_id && dfa->dst[edge] == new_state_id && strchr(dfa->lb[edge].c, c)!=NULL)
                         {
                             is_new_edge = 0;
                             new_state_id = edge; // 取已有边的ID
@@ -526,7 +526,6 @@ void print_DFA(struct D_finite_automata *g)
     printf("Printed DFA:\n");
     int p = 0;
 
-    printf("print g->n:%d", g->n);
     while (p < g->n)
     {
         if (g->adj[p] == -1)
@@ -722,9 +721,8 @@ struct frontend_regexp *parse_regex(char *ori_str, int len)
             p++;
         }
         char *c = (char *)malloc(p);
-        strncpy(c, str + 1, p - 1);
+        strncpy(c, str + 1, p);
         c[p - 1] = '\0';
-        // printf("after strncpy: c: %s\n", c);
         struct char_set *cs = (struct char_set *)malloc(sizeof(struct char_set));
         cs->n = p - 1;
         cs->c = c;
