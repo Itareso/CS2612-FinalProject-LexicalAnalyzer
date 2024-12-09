@@ -724,7 +724,7 @@ struct frontend_regexp *parse_regex(char *ori_str, int len)
         }
         char *c = (char *)malloc(p - 1);
         strncpy(c, str + 1, p - 1);
-        c[p - 1] = '\0';
+        c[p - 2] = '\0';
         struct char_set *cs = (struct char_set *)malloc(sizeof(struct char_set));
         cs->n = p - 1;
         cs->c = c;
