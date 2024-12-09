@@ -1,6 +1,12 @@
 CC = gcc
-CFLAGS = -Wall -Wno-unused-variable -fsanitize=undefined -fsanitize=address -g
-LDFLAGS = -fsanitize=undefined -fsanitize=address
+DEBUG ?= False
+ifeq ($(DEBUG), True)
+    CFLAGS = -Wall -Wno-unused-variable -fsanitize=undefined -fsanitize=address -g
+    LDFLAGS = -fsanitize=undefined -fsanitize=address
+else
+    CFLAGS = -Wall -Wno-unused-variable -g
+    LDFLAGS =
+endif
 OBJ = main.o regex.o lang.o
 EXEC = my_program.exe
 
