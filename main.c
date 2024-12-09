@@ -182,7 +182,7 @@ int main()
         if (len == 0)
             break;
         // printf("Input regex: \"%s\"\n", regex);
-
+        // printf("length = %d\n", len);
         struct frontend_regexp *tree = parse_regex(regex, len);
         printf("[Regex Tree]\n");
         printTree(tree, 0);
