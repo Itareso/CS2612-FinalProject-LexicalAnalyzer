@@ -449,6 +449,12 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
                 if (is_new_edge)
                 {
                     // TODO: if the size of state_sets is not enough, realloc it
+                    if (state_sets_size>=dfa->array_size)
+                    {
+                        dfa->array_size *=2;
+                        state_sets = (int **)realloc(state_sets, dfa->array_size * sizeof(int *));
+                        state_queue = (int *)realloc(state_queue, dfa->array_size * sizeof(int));
+                    }
                     state_sets[state_sets_size++] = new_state;
                     state_queue[queue_tail++] = new_state_id;
 
