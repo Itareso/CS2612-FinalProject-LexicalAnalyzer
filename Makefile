@@ -1,12 +1,19 @@
 CC = gcc
-DEBUG ?= False
-ifeq ($(DEBUG), True)
+MEMORYCHECK ?= False
+TEST ?= True
+
+ifeq ($(MEMORYCHECK), True)
     CFLAGS = -Wall -Wno-unused-variable -fsanitize=undefined -fsanitize=address -g
     LDFLAGS = -fsanitize=undefined -fsanitize=address
 else
     CFLAGS = -Wall -Wno-unused-variable -g
     LDFLAGS =
 endif
+
+ifeq ($(TEST), True)
+    CFLAGS += -DTEST_MODE
+endif
+
 OBJ = main.o regex.o lang.o
 EXEC = my_program.exe
 
