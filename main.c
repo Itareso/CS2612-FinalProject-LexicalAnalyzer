@@ -208,11 +208,6 @@ void demo() {
     }
     memset(regex, 0, sizeof(regex));
     memset(input, 0, sizeof(input));
-    // 内存爱泄露不泄露, 谁管的了你啊大爹? 给你写了多少行代码用来释放了? 你放了吗?
-    // free_frontend_regexp(tree);
-    // free_simpl_regexp(simplified);
-    // free_finite_automata(nfa);
-    // free_D_finite_automata(dfa);
 }
 
 
@@ -298,6 +293,8 @@ void test() {
 int main()
 {
 #ifdef TEST_MODE
+    printf("[[[[ This is test mode ]]]]\n");
+    printf("[[[[ Read samples from file ]]]]\n");
     test();
 #else
     printf("[[[[ This is demo mode ]]]]\n");
