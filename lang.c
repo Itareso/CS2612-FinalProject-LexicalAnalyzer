@@ -145,7 +145,7 @@ struct finite_automata *create_empty_graph()
     fa = (struct finite_automata *)malloc(sizeof(struct finite_automata));
     fa->n = 0;
     fa->m = 0;
-    fa->array_size = 100;
+    fa->array_size = 500;
     fa->src = (int *)malloc(fa->array_size * sizeof(int));
     fa->dst = (int *)malloc(fa->array_size * sizeof(int));
     fa->adj = (int *)malloc(fa->array_size * sizeof(int));
@@ -214,7 +214,7 @@ struct D_finite_automata *create_dfa_empty_graph()
     fa = (struct D_finite_automata *)malloc(sizeof(struct D_finite_automata));
     fa->n = 0;
     fa->m = 0;
-    fa->array_size = 100;
+    fa->array_size = 500;
     fa->src = (int *)malloc(fa->array_size * sizeof(int));
     fa->dst = (int *)malloc(fa->array_size * sizeof(int));
     fa->adj = (int *)malloc(fa->array_size * sizeof(int));
@@ -380,7 +380,7 @@ struct D_finite_automata *nfa_to_dfa(struct finite_automata *nfa)
 {
     struct D_finite_automata *dfa = create_dfa_empty_graph();
 
-    int size = 100;
+    int size = 500;
     // 使用一个数组来存储NFA状态集合，初始化为NFA的起始状态的epsilon闭包
     int *start_closure = (int *)malloc(nfa->n * sizeof(int));
     memset(start_closure, 0, nfa->n * sizeof(int));

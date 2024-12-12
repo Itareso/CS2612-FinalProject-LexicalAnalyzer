@@ -1,0 +1,23 @@
+([abc]?(def)+)?
+
+([abc]?(def)+)?
+bdefdefdefdefdef
+([abc]?(def)+)?
+defdef
+([abc]?(def)+)?
+ddefdef
+[0123456789._%+-]+@[csjtueduqom.-]+.[csjtueduqom][csjtueduqom]+
+212245086@qq.com
+[0123456789._%+-]+@[csjtueduqom.-]+.[csjtueduqom][csjtueduqom]+
+21224506@qq.qq.qq.com.com.com
+((25[012345]|2[1234][0123456789]|[01]?[0123456789][0123456789]?).)((25[012345]|2[1234][0123456789]|[01]?[0123456789][0123456789]?).)((25[012345]|2[1234][0123456789]|[01]?[0123456789][0123456789]?).)(25[012345]|2[01234][0123456789]|[01]?[0123456789][0123456789]?)
+255.255.255.255
+((25[012345]|2[1234][0123456789]|[01]?[0123456789][0123456789]?).)((25[012345]|2[1234][0123456789]|[01]?[0123456789][0123456789]?).)((25[012345]|2[1234][0123456789]|[01]?[0123456789][0123456789]?).)(25[012345]|2[01234][0123456789]|[01]?[0123456789][0123456789]?)
+127.12.257.3
+((25[012345]|2[1234][0123456789]|[01]?[0123456789][0123456789]?).)((25[012345]|2[1234][0123456789]|[01]?[0123456789][0123456789]?).)((25[012345]|2[1234][0123456789]|[01]?[0123456789][0123456789]?).)(25[012345]|2[01234][0123456789]|[01]?[0123456789][0123456789]?)
+127.12.12.0
+(((duck|new)speak(er)?|mini(true|love|peace)|big brother|oceania) is ((double?plus)?good|goodest|gooder) than (goldstein|(old|crime)think(er)?)|(old|crime)thinker un((belly)?(feel|like)) Ingsoc|newspeak,)*(((duck|new)speak(er)?|mini(true|love|peace)|big brother|oceania) is ((double?plus)?good|goodest|gooder) than (goldstein|(old|crime)think(er)?)|(old|crime)thinker un((belly)?(feel|like)) Ingsoc|newspeak)
+big brother is gooder than goldstein
+(((duck|new)speak(er)?|mini(true|love|peace)|big brother|oceania) is ((double?plus)?good|goodest|gooder) than (goldstein|(old|crime)think(er)?)|(old|crime)thinker un((belly)?(feel|like)) Ingsoc|newspeak,)*(((duck|new)speak(er)?|mini(true|love|peace)|big brother|oceania) is ((double?plus)?good|goodest|gooder) than (goldstein|(old|crime)think(er)?)|(old|crime)thinker un((belly)?(feel|like)) Ingsoc|newspeak)
+minitrue is good
+

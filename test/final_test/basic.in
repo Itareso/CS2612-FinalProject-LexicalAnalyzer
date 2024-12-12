@@ -1,0 +1,56 @@
+abc|def|ghi
+abc
+abc|def|ghi
+def
+abc|def|ghi
+ghi
+abc|def|ghi
+abc def
+abc|def|ghi
+abcdef
+[abcdefghijklmnopqrstuvwxyz]*
+
+[abcdefghijklmnopqrstuvwxyz]*
+anyletters
+[abcdefghijklmnopqrstuvwxyz]*
+butnonumber2init
+[abcdefghijklmnopqrstuvwxyz]*
+nospace init
+[abcdefghijklmnopqrstuvwxyz]*
+x
+(def )?(function)
+function
+(def )?(function)
+def function
+(def )?(function)
+deffunction
+(def )?(function)
+dfunction
+(def )[_abcdefghijklmnopqrstuvwxyz]+
+def my_func
+(def )[_abcdefghijklmnopqrstuvwxyz]+
+def _can_begin_with_underline_or_any_letters
+(def )[_abcdefghijklmnopqrstuvwxyz]+
+defmy_func
+(def )[_abcdefghijklmnopqrstuvwxyz]+
+def 12can_not_begin_with_number
+(def )[_abcdefghijklmnopqrstuvwxyz]+
+_def_is_must
+a
+a
+x
+x
+y
+Y
+(def )[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]*
+def _match_anyFunctions123_name
+(def )[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]*
+def smallCamel
+(def )[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]*
+def BigCamelCase23451234_____
+(def )[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]*
+def ___
+(def )[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]*
+def 1234
+(def )[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]*
+def  too_much_space

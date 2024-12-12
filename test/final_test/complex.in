@@ -1,0 +1,38 @@
+(aA)?(bB)?(cC)?(dD)?(eE)?(fF)?(gG)?(hH)?(iI)?(jJ)?(kK)?(lL)?(mM)?(nN)?(oO)?(pP)?(qQ)?(rR)?(sS)?(tT)?(uU)?(vV)?(wW)?(xX)?(yY)?(zZ)?/Anything/or/Nothing
+gGnNwWzZ/Anything/or/Nothing
+(aA)?(bB)?(cC)?(dD)?(eE)?(fF)?(gG)?(hH)?(iI)?(jJ)?(kK)?(lL)?(mM)?(nN)?(oO)?(pP)?(qQ)?(rR)?(sS)?(tT)?(uU)?(vV)?(wW)?(xX)?(yY)?(zZ)?/Anything/or/Nothing
+bBcC/Anything/or/Nothing
+(aA)?(bB)?(cC)?(dD)?(eE)?(fF)?(gG)?(hH)?(iI)?(jJ)?(kK)?(lL)?(mM)?(nN)?(oO)?(pP)?(qQ)?(rR)?(sS)?(tT)?(uU)?(vV)?(wW)?(xX)?(yY)?(zZ)?/Anything/or/Nothing
+/Anything/or/Nothing
+(aA)?(bB)?(cC)?(dD)?(eE)?(fF)?(gG)?(hH)?(iI)?(jJ)?(kK)?(lL)?(mM)?(nN)?(oO)?(pP)?(qQ)?(rR)?(sS)?(tT)?(uU)?(vV)?(wW)?(xX)?(yY)?(zZ)?/Anything/or/Nothing
+aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ/Anything/or/Nothing
+(aA)?(bB)?(cC)?(dD)?(eE)?(fF)?(gG)?(hH)?(iI)?(jJ)?(kK)?(lL)?(mM)?(nN)?(oO)?(pP)?(qQ)?(rR)?(sS)?(tT)?(uU)?(vV)?(wW)?(xX)?(yY)?(zZ)?/Anything/or/Nothing
+wWwWwW/Anything/or/Nothing
+(aA)?(bB)?(cC)?(dD)?(eE)?(fF)?(gG)?(hH)?(iI)?(jJ)?(kK)?(lL)?(mM)?(nN)?(oO)?(pP)?(qQ)?(rR)?(sS)?(tT)?(uU)?(vV)?(wW)?(xX)?(yY)?(zZ)?/Anything/or/Nothing
+bBaAzZ/Anything/or/Nothing
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+0#a#1#b#2#c#3#d#4#e#5#f#6#g#7#h#8#i#9##done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+a#1#b#2#c#3#d#4#e#5#f#6#g#7#h#8#i#9##done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+_someVarName *fancy* name!#done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+OtherVARNAME___ *awaful* name!#done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+_ *fancy* name!#done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+cross-big-small:3case#done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+#done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+aAbBcCdD#done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+a#0#0#a#0#0#b#1##done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+_0 *fancy* name!AnotherName *fancy* name!___yet_another_one111 *awaful* name!#done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+_0 ******fancy* name!aAbBcCxXcross-big-small:3case_smallCamelVarName **awaful****** name!0#a#0##done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+cross-big-small:3caseaAbBcCdDwWxXcross-big-small:3casecross-big-small:3casexXxXxX#done.
+(([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
+aAbBcC *fancy* name!cross-big-small:3casea#9#8#b#7##done.

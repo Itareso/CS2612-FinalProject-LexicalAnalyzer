@@ -4,116 +4,14 @@
 #include "regex.h"
 #include "lang.h"
 #include <ctype.h>
+#include <dirent.h>
 
 // 读入一个字符串
 void readString(char *str, int size, int *length)
 {
     fgets(str, size, stdin);
-
-    // Remove the newline character if present
     str[strcspn(str, "\n")] = '\0';
-
-    // Calculate the length of the string
     *length = strlen(str);
-}
-
-void free_finite_automata(struct finite_automata *fa)
-{
-    if (fa == NULL) return;
-    free(fa->src);
-    free(fa->dst);
-    if (fa->lb) {
-        free(fa->lb->c);
-        free(fa->lb);
-    }
-    free(fa->adj);
-    free(fa->next);
-    free(fa->accepting);
-    fa = NULL;
-}
-
-void free_D_finite_automata(struct D_finite_automata *dfa) {
-    if (dfa == NULL) return;
-    free(dfa->src);
-    free(dfa->dst);
-    free(dfa->adj);
-    free(dfa->next);
-    free(dfa->accepting);
-    if (dfa->lb) {
-        free(dfa->lb->c);
-        free(dfa->lb);
-    }
-    if (dfa->nodes) {
-        free(dfa->nodes->state);
-        free(dfa->nodes);
-    }
-    dfa = NULL;
-}
-
-
-void free_frontend_regexp(struct frontend_regexp *regexp) {
-    if (regexp == NULL) return;
-
-    switch (regexp->t) {
-        case T_FR_OPTIONAL:
-            free_frontend_regexp(regexp->d.OPTION.r);
-            break;
-
-        case T_FR_STAR:
-            free_frontend_regexp(regexp->d.STAR.r);
-            break;
-
-        case T_FR_PLUS:
-            free_frontend_regexp(regexp->d.PLUS.r);
-            break;
-
-        case T_FR_STRING:
-            free(regexp->d.STRING.s);
-            break;
-
-        case T_FR_SINGLE_CHAR:
-            break;
-
-        case T_FR_UNION:
-            free_frontend_regexp(regexp->d.UNION.r1);
-            free_frontend_regexp(regexp->d.UNION.r2);
-            break;
-
-        case T_FR_CONCAT:
-            free_frontend_regexp(regexp->d.CONCAT.r1);
-            free_frontend_regexp(regexp->d.CONCAT.r2);
-            break;
-
-        case T_FR_CHAR_SET:
-            break;
-    }
-
-    regexp = NULL;
-}
-
-void free_simpl_regexp(struct simpl_regexp *regexp) {
-    if (regexp == NULL) return;
-    switch (regexp->t) {
-        case T_S_CHAR_SET:
-            if (regexp->d.CHAR_SET.c) free(regexp->d.CHAR_SET.c);
-            break;
-        case T_S_STAR:
-            if (regexp->d.STAR.r) free_simpl_regexp(regexp->d.STAR.r);
-            break;
-
-        case T_S_UNION:
-            if (regexp->d.UNION.r1) free_simpl_regexp(regexp->d.UNION.r1);
-            if (regexp->d.UNION.r2) free_simpl_regexp(regexp->d.UNION.r2);
-            break;
-
-        case T_S_CONCAT:
-            if (regexp->d.CONCAT.r1) free_simpl_regexp(regexp->d.CONCAT.r1);
-            if (regexp->d.CONCAT.r2) free_simpl_regexp(regexp->d.CONCAT.r2);
-            break;
-        case T_S_EMPTY_STR:
-            break;
-    }
-    regexp = NULL;
 }
 
 // 打印辅助函数：打印字符串中的特殊字符（比如控制符）
@@ -264,10 +162,11 @@ void printSimplifiedTree(struct simpl_regexp *node, int level)
     }
 }
 
-char regex[100];
-char input[100];
+
 
 void demo() {
+    char regex[500];
+    char input[500];
     int len;
     struct finite_automata *nfa = NULL;
     struct D_finite_automata *dfa = NULL;
@@ -306,72 +205,104 @@ void demo() {
         print_DFA(dfa);
         bool accept = dfa_accepts_string(dfa, input);
         printf("[Accept]: %s\n", accept ? "true" : "false");
-        // free_frontend_regexp(tree);
-        // free_simpl_regexp(simplified);
-        // free_finite_automata(nfa);
-        // free_D_finite_automata(dfa);
     }
     memset(regex, 0, sizeof(regex));
     memset(input, 0, sizeof(input));
-    free_frontend_regexp(tree);
-    free_simpl_regexp(simplified);
-    free_finite_automata(nfa);
-    free_D_finite_automata(dfa);
-
+    // 内存爱泄露不泄露, 谁管的了你啊大爹? 给你写了多少行代码用来释放了? 你放了吗?
+    // free_frontend_regexp(tree);
+    // free_simpl_regexp(simplified);
+    // free_finite_automata(nfa);
+    // free_D_finite_automata(dfa);
 }
 
 
+void test_single_file(const char *test_in_name, const char *test_out_name) {
+    printf("[Test file %s]\n", test_in_name);
+    FILE *test_in = fopen(test_in_name, "r");
+    FILE *test_out = fopen(test_out_name, "r");
+    if (!test_in || !test_out) {
+        printf("Error opening test files.\n");
+        return;
+    }
 
-void test() {
-    struct test_case {
-        char r[100];
-        char in[100];
-        bool expected_accept;
-    } test_cases[] = {
-        {"ab|cd", "cd", true},
-        {"((def )[_abcdefghijklmnopqrstuvwxyz0123]+)?", "def func1", true},
-        {"((def )[_abcdefghijklmnopqrstuvwxyz0123]+)?", "def _func2", true},
-        {"((def )[_abcdefghijklmnopqrstuvwxyz0123]+)?", "", true},
-        {"((def )[_abcdefghijklmnopqrstuvwxyz0123]+)?", "deffunc1", false},
-        {"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "cdf", false}
-    };
-
-    int num_cases = sizeof(test_cases) / sizeof(test_cases[0]);
+    char regex[500];
+    char input[500];
+    char expected_output[10];
     
-    // 逐个执行测试
-    for (int i = 0; i < num_cases; i++) {
-        printf("Test Case %d: Regex = %s, Input = %s\n", i+1, test_cases[i].r, test_cases[i].in);
+    int case_number = 1;
 
-        // 模拟demo函数中的操作
-        memset(regex, 0, sizeof(regex));
-        strncpy(regex, test_cases[i].r, sizeof(regex)-1);
+    while (fgets(regex, sizeof(regex), test_in)) {
+        regex[strcspn(regex, "\n")] = '\0';
+        if (!fgets(input, sizeof(input), test_in)) {
+            break;
+        }
+        input[strcspn(input, "\n")] = '\0';
+
+        if (!fgets(expected_output, sizeof(expected_output), test_out)) {
+            break;
+        }
+        expected_output[strcspn(expected_output, "\n")] = '\0';  // 去除换行符
 
         struct frontend_regexp *tree = parse_regex(regex, strlen(regex));
         struct simpl_regexp *simplified = simplify_regexp(tree);
-
-        memset(input, 0, sizeof(input));
-        strncpy(input, test_cases[i].in, sizeof(input)-1);
 
         struct finite_automata *nfa = create_empty_graph();
         regexp_to_NFA(nfa, simplified);
         struct D_finite_automata *dfa = nfa_to_dfa(nfa);
 
         bool accept = dfa_accepts_string(dfa, input);
-        printf("[Expected Accept]: %s\n", test_cases[i].expected_accept ? "true" : "false");
-        printf("[Actual Accept]: %s\n", accept ? "true" : "false");
-        
-        // 比对结果
-        if (accept == test_cases[i].expected_accept) {
-            printf("Test Case %d Passed.\n\n", i+1);
-        } else {
-            printf("Test Case %d Failed.\n\n", i+1);
+        bool ground_truth = strcmp(expected_output, "true") == 0 ? true : false;
+        printf("%d\t| %s\n", case_number++, (accept==ground_truth) ? "Pass" : "### Fail ###");
+        if (accept != ground_truth) {
+            printf("[Regex] %s\n[Input]\t\t%s\n", regex, input);
+            printf("[Expected]\t%s\n", expected_output);
+            printf("[Output]\t%s\n", accept ? "true" : "false");
+        }
+    }
+    memset(regex, 0, sizeof(regex));
+    memset(input, 0, sizeof(input));
+    fclose(test_in);
+    fclose(test_out);
+}
+
+void test() {
+    const char *folder = "./test/final_test/";
+    struct dirent *entry;
+    DIR *dp = opendir(folder);
+
+    if (dp == NULL) {
+        printf("Error opening directory %s\n", folder);
+        return;
+    }
+    printf("[Start testing in %s]\n", folder);
+    while ((entry = readdir(dp)) != NULL) {
+        if (entry->d_name[0] != '.') // 忽略隐藏文件和当前目录、父目录
+        {
+            const char *ext = strrchr(entry->d_name, '.');
+            if (ext && strcmp(ext, ".in") == 0)
+            {
+                char input_file[256];
+                char output_file[256];
+
+                snprintf(input_file, sizeof(input_file), "%s%s", folder, entry->d_name);
+                snprintf(output_file, sizeof(output_file), "%s%s", folder, entry->d_name);
+                output_file[strlen(output_file) - 3] = '\0'; // Remove ".in"
+                strcat(output_file, ".out");
+
+                test_single_file(input_file, output_file);
+            }
         }
     }
 }
 
 int main()
 {
-    // demo();
+#ifdef TEST_MODE
     test();
+#else
+    printf("[[[[ This is demo mode ]]]]\n");
+    printf("[[[[ Input a regex first, then input a string to match. ]]]]\n");
+    demo();
+#endif
     return 0;
 }
