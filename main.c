@@ -238,6 +238,7 @@ void test_single_file(const char *test_in_name, const char *test_out_name) {
         }
         expected_output[strcspn(expected_output, "\n")] = '\0';  // 去除换行符
 
+        //====================== 测试主体 ======================//
         struct frontend_regexp *tree = parse_regex(regex, strlen(regex));
         struct simpl_regexp *simplified = simplify_regexp(tree);
 
@@ -253,6 +254,7 @@ void test_single_file(const char *test_in_name, const char *test_out_name) {
             printf("[Expected]\t%s\n", expected_output);
             printf("[Output]\t%s\n", accept ? "true" : "false");
         }
+        //====================================================//
     }
     memset(regex, 0, sizeof(regex));
     memset(input, 0, sizeof(input));
