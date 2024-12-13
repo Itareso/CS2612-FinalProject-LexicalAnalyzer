@@ -144,3 +144,7 @@ double *
 float * *
 (((long )?(long )?int)|float|double|char|short|bool) +[*]? *[*]? *[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_][abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_]*
 bool ***too_much_star
+(((long )?(long )?int)|float|double|char|short|bool) +[*]? *[*]? *[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_][abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_]*
+short*lackSpace
+(((long )?(long )?int)|float|double|char|short|bool) +[*]? *[*]? *[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_][abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_]*
+long long long int * too_manyLONG

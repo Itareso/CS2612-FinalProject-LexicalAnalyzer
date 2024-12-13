@@ -54,3 +54,17 @@ def ___
 def 1234
 (def )[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ][_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]*
 def  too_much_space
+(first|second|number-[012])+
+first
+(first|second|number-[012])+
+second
+(first|second|number-[012])+
+number-0
+(first|second|number-[012])+
+firstnumber-0number-1second
+(first|second|number-[012])+
+firstfirstfirstnumber-2
+(first|second|number-[012])+
+first-0
+(first|second|number-[012])+
+second-1

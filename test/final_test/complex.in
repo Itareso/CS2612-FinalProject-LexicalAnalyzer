@@ -36,3 +36,35 @@ _0 ******fancy* name!aAbBcCxXcross-big-small:3case_smallCamelVarName **awaful***
 cross-big-small:3caseaAbBcCdDwWxXcross-big-small:3casecross-big-small:3casexXxXxX#done.
 (([0123456789]#)?([abcdefghijklmnopqrstuvwxyz]#[0123456789]#)+|[_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]+( [*]*(fancy|awaful)[*]* name!)|([abcdefghijklmnopqrstuvwxyz][ABCDEFGHIJKLMNOPQRSTUVWXYZ])*|(cross-big-small:3case))+#done.
 aAbBcC *fancy* name!cross-big-small:3casea#9#8#b#7##done.
+(#[abcd]*(@(eE|fF|(xX)+)!(I have [012]|Nothing|You are [ABC]))+)+
+#aaa@fF!I have 0
+(#[abcd]*(@(eE|fF|(xX)+)!(I have [012]|Nothing|You are [ABC]))+)+
+#@xXxXxX!You are C
+(#[abcd]*(@(eE|fF|(xX)+)!(I have [012]|Nothing|You are [ABC]))+)+
+#dcb@xX!Nothing
+(#[abcd]*(@(eE|fF|(xX)+)!(I have [012]|Nothing|You are [ABC]))+)+
+#b@eE!I have 2@fF!I have 1@xX!Nothing@xXxXxXxXxXxX!You are B
+(#[abcd]*(@(eE|fF|(xX)+)!(I have [012]|Nothing|You are [ABC]))+)+
+#aaaa@xXxX!Nothing@xX!You are A#bbbb@fF!I have 0@xX!You are C
+(#[abcd]*(@(eE|fF|(xX)+)!(I have [012]|Nothing|You are [ABC]))+)+
+#@eE!Nothing#@fF!Nothing#@xX!You are A
+(#[abcd]*(@(eE|fF|(xX)+)!(I have [012]|Nothing|You are [ABC]))+)+
+#ab@eEeEeE!I have 1
+(#[abcd]*(@(eE|fF|(xX)+)!(I have [012]|Nothing|You are [ABC]))+)+
+#ddddd@xXxXxXxXxX!I have Nothing#bbbb@fF!I have 0@xX!You are C
+(very very very very very long sentence with all lower case letters)|(Very Very Very Very Very Long Sentence With All Upper Case Letters)
+very very very very very long sentence with all lower case letters
+(very very very very very long sentence with all lower case letters)|(Very Very Very Very Very Long Sentence With All Upper Case Letters)
+Very Very Very Very Very Long Sentence With All Upper Case Letters
+(asentencewithallletterlowercase)|(A[sS][eE][nN][tT][eE][nN][cC][eE][wW][iI][tT][hH][aA][lL][lL][lL][eE][tT][tT][eE][rR][lL][oO][wW][eE][rR][cC][aA][sS][eE])
+AsenTencewitHalLLetterlOwerCase
+(asentencewithallletterlowercase)|(A[sS][eE][nN][tT][eE][nN][cC][eE][wW][iI][tT][hH][aA][lL][lL][lL][eE][tT][tT][eE][rR][lL][oO][wW][eE][rR][cC][aA][sS][eE])
+asentencewithallletterlowercase
+(asentencewithallletterlowercase)|(A[sS][eE][nN][tT][eE][nN][cC][eE][wW][iI][tT][hH][aA][lL][lL][lL][eE][tT][tT][eE][rR][lL][oO][wW][eE][rR][cC][aA][sS][eE])
+AsentencEWIThaLLLetterlowercAse
+(asentencewithallletterlowercase)|(A[sS][eE][nN][tT][eE][nN][cC][eE][wW][iI][tT][hH][aA][lL][lL][lL][eE][tT][tT][eE][rR][lL][oO][wW][eE][rR][cC][aA][sS][eE])
+ASEntencewithallletterlOWERCASE
+(asentencewithallletterlowercase)|(A[sS][eE][nN][tT][eE][nN][cC][eE][wW][iI][tT][hH][aA][lL][lL][lL][eE][tT][tT][eE][rR][lL][oO][wW][eE][rR][cC][aA][sS][eE])
+ASENTENCEWITHALLLETTERLOWERCASE
+(asentencewithallletterlowercase)|(A[sS][eE][nN][tT][eE][nN][cC][eE][wW][iI][tT][hH][aA][lL][lL][lL][eE][tT][tT][eE][rR][lL][oO][wW][eE][rR][cC][aA][sS][eE])
+aSEnTencewithalLeTterLoweRcaSE
