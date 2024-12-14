@@ -4,15 +4,25 @@
 
 struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
 {
+    /* This function takes in a frontend regular expression, and returns a simplified
+    regular expression.
+    */
+
+    // allocate memory space for the simplified regex
     struct simpl_regexp *sr;
     sr = (struct simpl_regexp *)malloc(sizeof(struct simpl_regexp));
+
+    // conditioned on the type of the frontend regex
     switch (r->t)
     {
     case T_FR_CHAR_SET:
+        // if the frontend regex is a charset, directly copy the charset to the new regex
         sr->t = T_S_CHAR_SET;
         sr->d.CHAR_SET = r->d.CHAR_SET;
         break;
+
     case T_FR_OPTIONAL:
+        // if the frontend regex is (r?), turn it to simpl(r) | empty_str
         sr->t = T_S_UNION;
         struct simpl_regexp *none;
         none = (struct simpl_regexp *)malloc(sizeof(struct simpl_regexp));
@@ -20,11 +30,15 @@ struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
         sr->d.UNION.r1 = none;
         sr->d.UNION.r2 = simplify_regexp(r->d.OPTION.r);
         break;
+
     case T_FR_STAR:
+        // if the frontend regex is (r*), turn it to (simpl(r))*
         sr->t = T_S_STAR;
         sr->d.STAR.r = simplify_regexp(r->d.STAR.r);
         break;
+
     case T_FR_PLUS:
+        // if the frontend regex is (r+), turn it to concat(simpl(r), (simpl(r))*)
         sr->t = T_S_CONCAT;
         sr->d.CONCAT.r1 = simplify_regexp(r->d.PLUS.r);
         struct simpl_regexp *star;
@@ -33,7 +47,10 @@ struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
         star->d.STAR.r = simplify_regexp(r->d.PLUS.r);
         sr->d.CONCAT.r2 = star;
         break;
+
     case T_FR_STRING:
+        // if the frontend regex is a string, we recursively turn it into the concatenation
+        // of several charsets, each of which only contains one character
         if (strlen(r->d.STRING.s) == 0)
         {
             sr->t = T_S_EMPTY_STR;
@@ -79,24 +96,31 @@ struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
             free(rstring);
         }
         break;
+
     case T_FR_SINGLE_CHAR:
-    {
-        sr->t = T_S_CHAR_SET;
-        struct char_set cs;
-        cs.n = 1;
-        char *str = (char *)malloc(2 * sizeof(char));
-        str[0] = r->d.SINGLE_CHAR.c;
-        str[1] = '\0';
-        cs.c = str;
-        sr->d.CHAR_SET = cs;
-    }
-    break;
+        // if the frontend regex is a single char, turn it into a charset which only contains
+        // one character
+        {
+            sr->t = T_S_CHAR_SET;
+            struct char_set cs;
+            cs.n = 1;
+            char *str = (char *)malloc(2 * sizeof(char));
+            str[0] = r->d.SINGLE_CHAR.c;
+            str[1] = '\0';
+            cs.c = str;
+            sr->d.CHAR_SET = cs;
+        }
+        break;
+
     case T_FR_UNION:
+        // if the frontend regex is p | q, turn it into simpl(p) | simpl(q)
         sr->t = T_S_UNION;
         sr->d.UNION.r1 = simplify_regexp(r->d.UNION.r1);
         sr->d.UNION.r2 = simplify_regexp(r->d.UNION.r2);
         break;
+
     case T_FR_CONCAT:
+        // if the frontend regex is concat(p, q), turn it into concat(simpl(p), simpl(q))
         sr->t = T_S_CONCAT;
         sr->d.CONCAT.r1 = simplify_regexp(r->d.CONCAT.r1);
         sr->d.CONCAT.r2 = simplify_regexp(r->d.CONCAT.r2);
@@ -107,6 +131,7 @@ struct simpl_regexp *simplify_regexp(struct frontend_regexp *r)
 
 struct char_set get_empty_charset()
 {
+    // this function is an assisting function which returns an empty charset
     struct char_set empty;
     empty.n = 0;
     empty.c = (char *)malloc(sizeof(char));
@@ -116,9 +141,12 @@ struct char_set get_empty_charset()
 
 int add_one_regexp(struct finite_automata *g, struct simpl_regexp *r, int start)
 {
+    /* this function adds a regular expression r to the NFA g, it also takes in a vertex id
+    'start', which is the start vertex of r. the function returns the end vertex of r in g
+    */
     int end_v;
     struct char_set emptycs = get_empty_charset();
-    // printf("now matching %d\n", r->t);
+
     switch (r->t)
     {
     case T_S_CHAR_SET:
@@ -180,6 +208,8 @@ int add_one_regexp(struct finite_automata *g, struct simpl_regexp *r, int start)
 
 void regexp_to_NFA(struct finite_automata *g, struct simpl_regexp *r)
 {
+    /* this function constructs an NFA g for the given regex r
+     */
     int start = add_one_vertex(g);
     int end_v = add_one_regexp(g, r, start);
     g->accepting[end_v] = 1;
@@ -187,6 +217,9 @@ void regexp_to_NFA(struct finite_automata *g, struct simpl_regexp *r)
 
 void print_NFA(struct finite_automata *g)
 {
+    /* this function prints the NFA g, the format is, for each edge in g, it will print
+    a-label->b, a is the start vertex, b is the end vertex, and label is the charset of this edge
+    */
     printf("Printed NFA:\n");
     int p = 0;
     while (g->adj[p] != -1)
